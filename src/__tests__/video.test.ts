@@ -12,8 +12,9 @@ import {
   similarity,
   validateScript,
 } from "../video/review.js";
+import { GeminiImage, GeminiTts, imagePrompt, lastOutputBlock } from "../video/gemini.js";
 import type { TtsProvider } from "../video/tts.js";
-import type { VideoScript } from "../video/types.js";
+import type { ImageProvider, VideoScript } from "../video/types.js";
 
 const fakeTts: TtsProvider = {
   name: "fake",
@@ -140,6 +141,57 @@ describe("review queue", () => {
     expect(fs.readdirSync(dir)).toHaveLength(0);
   });
 
+  it("refuses videos above the per-video cap or the monthly budget", async () => {
+    const paidImages: ImageProvider = { name: "paid", costCents: () => 4, generate: async (_p, out) => `${out}.png` };
+    const twoScenes = { title: "Deux", niche: "n", scenes: [{ narration: "Un." }, { narration: "Deux." }] };
+    await expect(
+      createVideo(twoScenes, { dir, tts: fakeTts, images: paidImages, render, maxCostPerVideoCents: 5 }),
+    ).rejects.toThrow(/per-video cap/);
+
+    const counting = async (s: VideoScript, t: TtsProvider, out: string, _w: string, o: any) => {
+      for (const [i, scene] of s.scenes.entries()) {
+        await t.synthesize(scene.narration, "x");
+        await o.images?.generate("p", `img-${i}`);
+      }
+      fs.writeFileSync(out, "v");
+      return { durationSec: 70, costCents: 0 };
+    };
+    const first = await createVideo(twoScenes, {
+      dir, tts: fakeTts, images: paidImages, render: counting, monthlyBudgetCents: 10,
+    });
+    expect(first.costCents).toBe(8);
+    expect(first.visuals).toBe("paid");
+    await expect(
+      createVideo({ ...twoScenes, title: "Autre", scenes: [{ narration: "Trois." }, { narration: "Quatre." }] }, {
+        dir, tts: fakeTts, images: paidImages, render: counting, monthlyBudgetCents: 10,
+      }),
+    ).rejects.toThrow(/Monthly video budget/);
+  });
+
+  it("keeps the cost of a render that failed after paid calls, and allows a retry", async () => {
+    const paidImages: ImageProvider = { name: "paid", costCents: () => 4, generate: async (_p, out) => `${out}.png` };
+    const failing = async (_s: VideoScript, _t: TtsProvider, _out: string, _w: string, o: any) => {
+      await o.images.generate("p", "img");
+      throw new Error("ffmpeg crashed");
+    };
+    const s = script("Une histoire qui échoue au rendu puis réussit.");
+    await expect(createVideo(s, { dir, tts: fakeTts, images: paidImages, render: failing })).rejects.toThrow(/crashed/);
+    const [failed] = listVideos(dir);
+    expect(failed.renderFailed).toBe(true);
+    expect(failed.costCents).toBe(4);
+    const retry = await createVideo(s, { dir, tts: fakeTts, images: paidImages, render });
+    expect(retry.status).toBe("pending_review");
+  });
+
+  it("uses Gemini providers only when GEMINI_API_KEY is set", async () => {
+    const { defaultProviders } = await import("../video/review.js");
+    const paid = await defaultProviders("fr", { GEMINI_API_KEY: "k" });
+    expect(paid.tts.name).toContain("gemini-3.8-flash-tts");
+    expect(paid.images?.name).toBe("gemini-nano-banana-2.1");
+    const free = await defaultProviders("fr", {});
+    expect(free.images).toBeUndefined();
+  });
+
   it("records a human review decision", async () => {
     const v = await createVideo(script("Une vidéo à relire."), { dir, tts: fakeTts, render });
     const reviewed = setVideoStatus(v.id, "rejected", "voix trop robotique", dir);
@@ -149,11 +201,37 @@ describe("review queue", () => {
   });
 
   it.skipIf(!hasTool("ffmpeg", ["-version"]) || !hasTool("espeak-ng", ["--version"]))(
+    "renders scenes over generated illustrations",
+    async () => {
+      const images: ImageProvider = {
+        name: "test-pattern",
+        costCents: () => 0,
+        generate: async (_prompt, out) => {
+          const file = `${out}.png`;
+          execFileSync("ffmpeg", ["-v", "error", "-f", "lavfi", "-i", "testsrc2=s=768x1344", "-frames:v", "1", file]);
+          return file;
+        },
+      };
+      const v = await createVideo(
+        { title: "Images", niche: "test", scenes: [{ narration: "Une scène illustrée.", visual: "un phare" }] },
+        { dir, images, env: {} },
+      );
+      expect(v.visuals).toBe("test-pattern");
+      const probe = execFileSync("ffprobe", [
+        "-v", "error", "-select_streams", "v:0",
+        "-show_entries", "stream=width,height", "-of", "csv=p=0", path.join(dir, v.id, "video.mp4"),
+      ]).toString().trim();
+      expect(probe).toBe("1080,1920");
+    },
+    60_000,
+  );
+
+  it.skipIf(!hasTool("ffmpeg", ["-version"]) || !hasTool("espeak-ng", ["--version"]))(
     "renders a real MP4 with ffmpeg and espeak-ng",
     async () => {
       const v = await createVideo(
         { title: "Rendu", niche: "test", scenes: [{ narration: "Bonjour. Ceci est un essai.", onScreen: "Essai" }] },
-        { dir },
+        { dir, env: {} },
       );
       const file = path.join(dir, v.id, "video.mp4");
       const probe = execFileSync("ffprobe", [
@@ -166,4 +244,62 @@ describe("review queue", () => {
     },
     60_000,
   );
+});
+
+describe("Gemini providers", () => {
+  const response = (type: "audio" | "image", data: string, mime = "image/png") =>
+    new Response(
+      JSON.stringify({
+        steps: [
+          { type: "user_input", content: [] },
+          { type: "model_output", content: [{ type: "text", text: "ok" }, { type, data, mime_type: mime }] },
+        ],
+      }),
+      { status: 200 },
+    );
+
+  it("writes the narration audio and sends the voice and key", async () => {
+    let sent: any;
+    let headers: any;
+    const fetchImpl = (async (_url: string, init: any) => {
+      sent = JSON.parse(init.body);
+      headers = init.headers;
+      return response("audio", Buffer.from("RIFFwav").toString("base64"));
+    }) as unknown as typeof fetch;
+    const tts = new GeminiTts({ apiKey: "secret", voice: "Kore", fetchImpl });
+    const out = path.join(os.tmpdir(), `tts-${Date.now()}.wav`);
+    await tts.synthesize("Bonjour", out);
+    expect(fs.readFileSync(out, "utf-8")).toBe("RIFFwav");
+    expect(sent.model).toBe("gemini-3.8-flash-tts");
+    expect(sent.generation_config.speech_config).toEqual([{ voice: "Kore" }]);
+    expect(headers["x-goog-api-key"]).toBe("secret");
+    expect(tts.costCents("x".repeat(140))).toBeCloseTo(0.225);
+    fs.rmSync(out);
+  });
+
+  it("writes a vertical image with the extension of its type", async () => {
+    let sent: any;
+    const fetchImpl = (async (_url: string, init: any) => {
+      sent = JSON.parse(init.body);
+      return response("image", Buffer.from("jpg").toString("base64"), "image/jpeg");
+    }) as unknown as typeof fetch;
+    const images = new GeminiImage({ apiKey: "k", fetchImpl });
+    const file = await images.generate("un phare", path.join(os.tmpdir(), `img-${Date.now()}`));
+    expect(file.endsWith(".jpg")).toBe(true);
+    expect(sent.response_format.aspect_ratio).toBe("9:16");
+    fs.rmSync(file);
+  });
+
+  it("reports API errors and missing output", async () => {
+    const fetchImpl = (async () =>
+      new Response(JSON.stringify({ error: { message: "API key not valid" } }), { status: 400 })) as unknown as typeof fetch;
+    await expect(new GeminiTts({ apiKey: "bad", fetchImpl }).synthesize("x", "/tmp/x.wav")).rejects.toThrow(/API key not valid/);
+    expect(() => lastOutputBlock({ steps: [] }, "audio")).toThrow(/no audio/);
+  });
+
+  it("asks for the scene's visual description without text in the image", () => {
+    const prompt = imagePrompt("Les abeilles", { narration: "…", visual: "une abeille qui danse sur un rayon" });
+    expect(prompt).toContain("une abeille qui danse sur un rayon");
+    expect(prompt).toContain("no text");
+  });
 });

@@ -5,35 +5,43 @@
   "scenes": [
     {
       "onScreen": "Le viaduc de Millau",
-      "narration": "Dans l'Aveyron, une autoroute passe au-dessus des nuages. C'est le viaduc de Millau, l'un des ponts les plus hauts du monde."
+      "narration": "Dans l'Aveyron, une autoroute passe au-dessus des nuages. C'est le viaduc de Millau, l'un des ponts les plus hauts du monde.",
+      "visual": "The Millau Viaduct cable-stayed bridge in Aveyron, France, rising above a sea of morning clouds, its white pylons emerging from the fog"
     },
     {
       "onScreen": "343 mètres",
-      "narration": "Son point culminant atteint trois cent quarante-trois mètres. C'est plus haut que la tour Eiffel. Par endroits, le tablier passe à environ deux cent soixante-dix mètres au-dessus du Tarn."
+      "narration": "Son point culminant atteint trois cent quarante-trois mètres. C'est plus haut que la tour Eiffel. Par endroits, le tablier passe à environ deux cent soixante-dix mètres au-dessus du Tarn.",
+      "visual": "View from the Tarn river valley floor looking straight up at a towering concrete pier of the Millau Viaduct"
     },
     {
       "onScreen": "Deux kilomètres et demi",
-      "narration": "Le tablier mesure environ deux mille quatre cent soixante mètres de long. Il repose sur sept piles, et il est tenu par des haubans, ces câbles disposés en éventail."
+      "narration": "Le tablier mesure environ deux mille quatre cent soixante mètres de long. Il repose sur sept piles, et il est tenu par des haubans, ces câbles disposés en éventail.",
+      "visual": "Wide side view of the Millau Viaduct spanning the entire valley, seven slender piers and white fan-shaped stay cables"
     },
     {
       "onScreen": "Des pylônes au-dessus des piles",
-      "narration": "Au-dessus de chaque pile se dresse un pylône d'environ quatre-vingt-sept mètres. C'est lui qui porte les haubans. Vu de loin, l'ensemble ressemble à une rangée de voiliers posés sur la vallée."
+      "narration": "Au-dessus de chaque pile se dresse un pylône d'environ quatre-vingt-sept mètres. C'est lui qui porte les haubans. Vu de loin, l'ensemble ressemble à une rangée de voiliers posés sur la vallée.",
+      "visual": "Close-up of one white pylon of the Millau Viaduct with its fan of stay cables against a blue sky, sailboat-like silhouette"
     },
     {
       "onScreen": "Un duo de concepteurs",
-      "narration": "L'ouvrage a été conçu par l'ingénieur français Michel Virlogeux, avec l'architecte britannique Norman Foster. L'objectif était de franchir la vallée sans l'écraser."
+      "narration": "L'ouvrage a été conçu par l'ingénieur français Michel Virlogeux, avec l'architecte britannique Norman Foster. L'objectif était de franchir la vallée sans l'écraser.",
+      "visual": "Architectural drawing table with technical sketches of a cable-stayed bridge, an engineer's hand holding a pencil"
     },
     {
       "onScreen": "Trois ans de chantier",
-      "narration": "Les travaux ont commencé fin deux mille un. Le viaduc a été inauguré en décembre deux mille quatre. Les tronçons du tablier ont été poussés depuis les deux rives jusqu'à se rejoindre au-dessus de la vallée."
+      "narration": "Les travaux ont commencé fin deux mille un. Le viaduc a été inauguré en décembre deux mille quatre. Les tronçons du tablier ont été poussés depuis les deux rives jusqu'à se rejoindre au-dessus de la vallée.",
+      "visual": "Construction of a cable-stayed bridge deck being launched between tall concrete piers above a green valley, cranes, early 2000s"
     },
     {
       "onScreen": "Fini les bouchons",
-      "narration": "Avant lui, la traversée de Millau était un célèbre point de bouchons sur la route des vacances. Aujourd'hui, on la survole en quelques secondes."
+      "narration": "Avant lui, la traversée de Millau était un célèbre point de bouchons sur la route des vacances. Aujourd'hui, on la survole en quelques secondes.",
+      "visual": "Summer traffic jam of cars on a winding road through a small French town in a valley, holiday luggage on roof racks"
     },
     {
       "onScreen": "Il bouge… un peu",
-      "narration": "Le tablier est conçu pour se dilater avec la chaleur et pour résister au vent violent de la vallée. Des écrans placés le long de la chaussée protègent les voitures des rafales."
+      "narration": "Le tablier est conçu pour se dilater avec la chaleur et pour résister au vent violent de la vallée. Des écrans placés le long de la chaussée protègent les voitures des rafales.",
+      "visual": "Cars driving on the Millau Viaduct deck behind transparent wind screens, valley far below"
     }
   ],
   "caption": "Ce pont français est plus haut que la tour Eiffel 🌉",

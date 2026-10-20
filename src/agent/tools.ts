@@ -2726,9 +2726,11 @@ Model: ${ctx.inference.getDefaultModel()}
     {
       name: "create_video",
       description:
-        "Render a vertical short video (1080x1920) from a script into the review queue. Runs locally and costs nothing. " +
-        "The video is NOT published: your creator reviews every video. Write original scripts over 61 seconds of narration; " +
-        "near-duplicates of earlier videos are refused.",
+        "Render a vertical short video (1080x1920) from a script into the review queue. With GEMINI_API_KEY set it uses a " +
+        "natural voice and one generated illustration per scene (about $0.03-0.04 per scene, capped per video and per month); " +
+        "otherwise it is free with a synthetic voice. The video is NOT published: your creator reviews every video. " +
+        "Write original scripts over 61 seconds of narration, and describe in `visual` exactly what each scene's image " +
+        "must show so it illustrates the story. Near-duplicates of earlier videos are refused.",
       category: "content",
       riskLevel: "caution",
       parameters: {
@@ -2745,6 +2747,10 @@ Model: ${ctx.inference.getDefaultModel()}
               properties: {
                 narration: { type: "string", description: "Text read aloud" },
                 onScreen: { type: "string", description: "Short headline shown on screen" },
+                visual: {
+                  type: "string",
+                  description: "Concrete description of the image for this scene (subject, place, era, framing)",
+                },
               },
               required: ["narration"],
             },

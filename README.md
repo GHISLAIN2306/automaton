@@ -102,7 +102,10 @@ Each automaton registers on Base via <a href="https://ethereum-magicians.org/t/e
 
 ## Video Production (review queue)
 
-The automaton can render short vertical videos (1080x1920) from a script with the `create_video` tool. Rendering is local and free: ffmpeg draws the visuals and subtitles, espeak-ng (with the MBROLA voices when installed) reads the narration, and every frame carries a visible "AI-generated" label, as the EU AI Act requires.
+The automaton can render short vertical videos (1080x1920) from a script with the `create_video` tool. ffmpeg assembles the scenes, subtitles and narration, and every frame carries a visible "AI-generated" label, as the EU AI Act requires.
+
+- With `GEMINI_API_KEY` set, the narration uses a natural voice (Gemini 3.8 Flash TTS, voice `AUTOMATON_TTS_VOICE`, default Charon) and each scene gets a generated illustration of its `visual` description (Nano Banana 2.1) with a slow zoom. That costs about $0.03-0.04 per scene. Spending is capped at $0.50 per video and $30 per month (`AUTOMATON_VIDEO_MAX_COST_CENTS`, `AUTOMATON_VIDEO_MONTHLY_BUDGET_CENTS`).
+- Without a key, rendering is free: espeak-ng (with the MBROLA voices when installed) reads the narration over animated gradients.
 
 Nothing is published. Videos wait in `~/.automaton/videos/` for a human:
 

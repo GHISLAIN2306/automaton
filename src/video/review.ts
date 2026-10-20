@@ -14,8 +14,15 @@ import { getAutomatonDir } from "../identity/wallet.js";
 import { renderVideo, type RenderResult } from "./render.js";
 import type { TtsProvider } from "./tts.js";
 import { createDefaultTts } from "./tts.js";
-import type { RenderOptions, VideoCheck, VideoManifest, VideoScript, VideoStatus } from "./types.js";
-import { DEFAULT_AI_LABEL, MAX_SIMILARITY, MIN_DURATION_SEC } from "./types.js";
+import { GeminiImage, GeminiTts } from "./gemini.js";
+import type { ImageProvider, RenderOptions, VideoCheck, VideoManifest, VideoScript, VideoStatus } from "./types.js";
+import {
+  DEFAULT_AI_LABEL,
+  DEFAULT_MAX_COST_PER_VIDEO_CENTS,
+  DEFAULT_MONTHLY_BUDGET_CENTS,
+  MAX_SIMILARITY,
+  MIN_DURATION_SEC,
+} from "./types.js";
 
 export function getVideosDir(): string {
   return path.join(getAutomatonDir(), "videos");
@@ -31,8 +38,10 @@ export function validateScript(input: unknown): VideoScript {
     if (!scene || typeof scene.narration !== "string" || !scene.narration.trim()) {
       throw new Error(`Scene ${i + 1} needs narration text`);
     }
-    if (scene.onScreen !== undefined && typeof scene.onScreen !== "string") {
-      throw new Error(`Scene ${i + 1}: onScreen must be text`);
+    for (const field of ["onScreen", "visual"] as const) {
+      if (scene[field] !== undefined && typeof scene[field] !== "string") {
+        throw new Error(`Scene ${i + 1}: ${field} must be text`);
+      }
     }
   });
   return s as VideoScript;
@@ -85,6 +94,7 @@ export function findNearDuplicate(
   const narration = narrationOf(script);
   let best: { id: string; title: string; score: number } | null = null;
   for (const video of listVideos(dir)) {
+    if (video.renderFailed) continue;
     const scriptFile = path.join(dir, video.id, "script.json");
     if (!fs.existsSync(scriptFile)) continue;
     const previous = JSON.parse(fs.readFileSync(scriptFile, "utf-8")) as VideoScript;
@@ -97,13 +107,54 @@ export function findNearDuplicate(
 export interface CreateVideoOptions extends RenderOptions {
   dir?: string;
   tts?: TtsProvider;
+  /** Spending caps in cents (default from env, then 50 per video and 3000 per month). */
+  maxCostPerVideoCents?: number;
+  monthlyBudgetCents?: number;
+  env?: NodeJS.ProcessEnv;
   /** Injected in tests to avoid running ffmpeg. */
   render?: typeof renderVideo;
+}
+
+/**
+ * Natural voice and illustrations when GEMINI_API_KEY is set (paid);
+ * otherwise the free local voice and gradient backgrounds.
+ */
+export async function defaultProviders(
+  language: string | undefined,
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{ tts: TtsProvider; images?: ImageProvider }> {
+  const apiKey = env.GEMINI_API_KEY;
+  if (apiKey) {
+    return {
+      tts: new GeminiTts({ apiKey, model: env.AUTOMATON_TTS_MODEL, voice: env.AUTOMATON_TTS_VOICE }),
+      images: new GeminiImage({ apiKey, model: env.AUTOMATON_IMAGE_MODEL }),
+    };
+  }
+  return { tts: await createDefaultTts(language) };
+}
+
+function centsFromEnv(value: string | undefined, fallback: number): number {
+  const n = Number(value);
+  return value !== undefined && Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
+/** Money already spent on videos created this calendar month (UTC), in cents. */
+export function spentThisMonthCents(dir = getVideosDir(), now = new Date()): number {
+  const month = now.toISOString().slice(0, 7);
+  return listVideos(dir)
+    .filter((v) => v.createdAt.startsWith(month))
+    .reduce((sum, v) => sum + (v.costCents || 0), 0);
+}
+
+export function estimateCostCents(script: VideoScript, tts: TtsProvider, images?: ImageProvider): number {
+  const voice = script.scenes.reduce((sum, s) => sum + tts.costCents(s.narration), 0);
+  return voice + (images ? images.costCents() * script.scenes.length : 0);
 }
 
 export async function createVideo(input: unknown, options: CreateVideoOptions = {}): Promise<VideoManifest> {
   const script = validateScript(input);
   const dir = options.dir ?? getVideosDir();
+  const env = options.env ?? process.env;
 
   const duplicate = findNearDuplicate(script, dir);
   if (duplicate && duplicate.score > MAX_SIMILARITY) {
@@ -113,22 +164,84 @@ export async function createVideo(input: unknown, options: CreateVideoOptions = 
     );
   }
 
+  const providers =
+    options.tts || options.images ? { tts: options.tts, images: options.images } : await defaultProviders(script.language, env);
+  const tts = providers.tts ?? (await createDefaultTts(script.language));
+  const images = providers.images;
+
+  const estimate = estimateCostCents(script, tts, images);
+  const perVideo = options.maxCostPerVideoCents ?? centsFromEnv(env.AUTOMATON_VIDEO_MAX_COST_CENTS, DEFAULT_MAX_COST_PER_VIDEO_CENTS);
+  const monthly = options.monthlyBudgetCents ?? centsFromEnv(env.AUTOMATON_VIDEO_MONTHLY_BUDGET_CENTS, DEFAULT_MONTHLY_BUDGET_CENTS);
+  if (estimate > perVideo) {
+    throw new Error(
+      `Estimated cost $${(estimate / 100).toFixed(2)} exceeds the per-video cap of $${(perVideo / 100).toFixed(2)}. Use fewer scenes.`,
+    );
+  }
+  const spent = spentThisMonthCents(dir);
+  if (spent + estimate > monthly) {
+    throw new Error(
+      `Monthly video budget reached: $${(spent / 100).toFixed(2)} spent of $${(monthly / 100).toFixed(2)}. ` +
+        "Ask your creator before spending more.",
+    );
+  }
+
   const id = ulid();
   const videoDir = path.join(dir, id);
   fs.mkdirSync(videoDir, { recursive: true });
   fs.writeFileSync(path.join(videoDir, "script.json"), JSON.stringify(script, null, 2));
 
-  const tts = options.tts ?? (await createDefaultTts(script.language));
+  // Count what each paid call actually costs, so a failed render is still billed.
+  let spentCents = 0;
+  const trackedTts: TtsProvider = {
+    name: tts.name,
+    costCents: (text) => tts.costCents(text),
+    synthesize: async (text, out) => {
+      await tts.synthesize(text, out);
+      spentCents += tts.costCents(text);
+    },
+  };
+  const trackedImages: ImageProvider | undefined = images && {
+    name: images.name,
+    costCents: () => images.costCents(),
+    generate: async (prompt, out) => {
+      const file = await images.generate(prompt, out);
+      spentCents += images.costCents();
+      return file;
+    },
+  };
+
   const aiLabel = options.aiLabel ?? DEFAULT_AI_LABEL;
   const render = options.render ?? renderVideo;
   let result: RenderResult;
   try {
-    result = await render(script, tts, path.join(videoDir, "video.mp4"), path.join(videoDir, "work"), {
+    result = await render(script, trackedTts, path.join(videoDir, "video.mp4"), path.join(videoDir, "work"), {
       ...options,
+      images: trackedImages,
       aiLabel,
     });
-  } catch (err) {
-    fs.rmSync(videoDir, { recursive: true, force: true });
+  } catch (err: any) {
+    if (spentCents > 0) {
+      // Keep a record of the money spent so the monthly budget stays accurate.
+      fs.rmSync(path.join(videoDir, "video.mp4"), { force: true });
+      const failed: VideoManifest = {
+        id,
+        title: script.title,
+        niche: script.niche,
+        status: "rejected",
+        createdAt: new Date().toISOString(),
+        reviewNote: `Render failed: ${err?.message ?? String(err)}`,
+        renderFailed: true,
+        durationSec: 0,
+        costCents: Math.round(spentCents * 100) / 100,
+        visuals: images?.name ?? "gradient",
+        aiLabel,
+        voice: tts.name,
+        checks: [],
+      };
+      fs.writeFileSync(path.join(videoDir, "manifest.json"), JSON.stringify(failed, null, 2));
+    } else {
+      fs.rmSync(videoDir, { recursive: true, force: true });
+    }
     throw err;
   } finally {
     fs.rmSync(path.join(videoDir, "work"), { recursive: true, force: true });
@@ -161,7 +274,8 @@ export async function createVideo(input: unknown, options: CreateVideoOptions = 
     status: "pending_review",
     createdAt: new Date().toISOString(),
     durationSec: Math.round(result.durationSec * 10) / 10,
-    costCents: result.costCents,
+    costCents: Math.round(spentCents * 100) / 100,
+    visuals: images?.name ?? "gradient",
     aiLabel,
     voice: tts.name,
     checks,

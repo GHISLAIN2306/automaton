@@ -1,10 +1,11 @@
 /**
  * Video Renderer
  *
- * Turns a VideoScript into a vertical 1080x1920 MP4 with ffmpeg only:
- * an animated gradient background per scene, the scene headline, subtitles
- * timed sentence by sentence, the synthesized narration, and a permanent
- * "AI-generated" label. Everything runs locally and costs nothing.
+ * Turns a VideoScript into a vertical 1080x1920 MP4 with ffmpeg: one
+ * background per scene (an illustration with a slow zoom when an image
+ * provider is set, otherwise an animated gradient), the scene headline,
+ * subtitles timed sentence by sentence, the narration, and a permanent
+ * "AI-generated" label.
  */
 
 import { execFile } from "child_process";
@@ -14,6 +15,7 @@ import { promisify } from "util";
 import type { TtsProvider } from "./tts.js";
 import type { RenderOptions, VideoScript } from "./types.js";
 import { DEFAULT_AI_LABEL } from "./types.js";
+import { imagePrompt } from "./gemini.js";
 
 const run = promisify(execFile);
 
@@ -119,6 +121,7 @@ export async function renderVideo(
   const font = filterPath(findFont(options.fontPath));
   const label = options.aiLabel ?? DEFAULT_AI_LABEL;
   const [c0, c1] = paletteFor(script.niche);
+  const images = options.images;
   const pause = 0.4;
 
   fs.mkdirSync(workDir, { recursive: true });
@@ -133,7 +136,30 @@ export async function renderVideo(
     costCents += tts.costCents(scene.narration);
     const duration = (await probeDuration(wav)) + pause;
 
+    let background: string[];
+    let backgroundFilters: string[];
+    if (images) {
+      const image = await images.generate(imagePrompt(script.title, scene), path.join(workDir, `image-${i}`));
+      costCents += images.costCents();
+      const frames = Math.ceil(duration * fps);
+      // Slow Ken Burns zoom, then darken the lower part so subtitles stay readable.
+      background = ["-i", image];
+      backgroundFilters = [
+        `scale=${Math.round(width * 1.1)}:${Math.round(height * 1.1)}:force_original_aspect_ratio=increase`,
+        `crop=${Math.round(width * 1.1)}:${Math.round(height * 1.1)}`,
+        `zoompan=z='min(zoom+0.0005,1.15)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${frames}:s=${width}x${height}:fps=${fps}`,
+        `drawbox=x=0:y=ih*0.58:w=iw:h=ih*0.42:color=black@0.35:t=fill`,
+      ];
+    } else {
+      background = [
+        "-f", "lavfi",
+        "-i", `gradients=s=${width}x${height}:c0=${c0}:c1=${c1}:speed=0.008:r=${fps}:d=${duration.toFixed(2)}:seed=${i + 1}`,
+      ];
+      backgroundFilters = [];
+    }
+
     const filters = [
+      ...backgroundFilters,
       `drawtext=fontfile='${font}':textfile='${filterPath(labelFile)}':fontsize=38:fontcolor=white@0.9:` +
         `box=1:boxcolor=black@0.45:boxborderw=14:x=(w-text_w)/2:y=90`,
     ];
@@ -142,7 +168,8 @@ export async function renderVideo(
       fs.writeFileSync(headline, wrapText(scene.onScreen, 16));
       filters.push(
         `drawtext=fontfile='${font}':textfile='${filterPath(headline)}':fontsize=96:fontcolor=white:` +
-          `line_spacing=18:shadowcolor=black@0.5:shadowx=4:shadowy=4:x=(w-text_w)/2:y=(h-text_h)/2-260`,
+          `line_spacing=18:shadowcolor=black@0.7:shadowx=4:shadowy=4:x=(w-text_w)/2:y=` +
+          (images ? "h*0.14" : "(h-text_h)/2-260"),
       );
     }
     for (const [j, s] of timeSentences(splitSentences(scene.narration), duration - pause).entries()) {
@@ -160,8 +187,7 @@ export async function renderVideo(
       "ffmpeg",
       [
         "-y", "-v", "error",
-        "-f", "lavfi",
-        "-i", `gradients=s=${width}x${height}:c0=${c0}:c1=${c1}:speed=0.008:r=${fps}:d=${duration.toFixed(2)}:seed=${i + 1}`,
+        ...background,
         "-i", wav,
         "-filter_complex", `[0:v]${filters.join(",")},format=yuv420p[v];[1:a]apad,aresample=44100[a]`,
         "-map", "[v]", "-map", "[a]",
