@@ -25,8 +25,8 @@ Une plateforme dont les secrets manquent est simplement ignorée.
 | Secret | Où l'obtenir |
 |---|---|
 | `GEMINI_API_KEY` | aistudio.google.com/app/apikey (facturation activée) |
-| `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET` | Google Cloud Console → projet → « YouTube Data API v3 » activée → Identifiants → ID client OAuth (type « Application de bureau ») |
-| `YOUTUBE_REFRESH_TOKEN` | jeton obtenu une fois avec l'autorisation `https://www.googleapis.com/auth/youtube.upload` (par exemple via OAuth Playground avec vos propres identifiants) |
+| `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET` | Google Cloud Console → projet → « YouTube Data API v3 » activée → Identifiants → ID client OAuth (type « Application Web », URI de redirection `https://developers.google.com/oauthplayground`) |
+| `YOUTUBE_REFRESH_TOKEN` | jeton obtenu une fois avec l'autorisation `https://www.googleapis.com/auth/youtube.upload` via OAuth Playground avec vos propres identifiants ; publier l’écran de consentement en production |
 | `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET` | developers.tiktok.com → votre app → produits « Login Kit » et « Content Posting API » (Direct Post), autorisation `video.publish` |
 | `TIKTOK_REFRESH_TOKEN` | jeton obtenu une fois en connectant votre compte TikTok à l'app |
 | `INSTAGRAM_ACCESS_TOKEN` | developers.facebook.com → app → « Instagram API with Instagram Login », compte professionnel (Créateur ou Entreprise), autorisations `instagram_business_basic` et `instagram_business_content_publish`, jeton longue durée |
