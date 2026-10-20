@@ -35,12 +35,13 @@
     "decouverte"
   ],
   "reviewedAt": "2026-10-20T22:41:14.898Z",
-  "reviewNote": "Publication automatique",
+  "reviewNote": "Video file missing; rendered again",
   "publications": {
     "youtube": {
       "status": "failed",
       "at": "2026-10-20T23:06:43.351Z",
       "error": "ENOENT: no such file or directory, open '/home/runner/work/automaton/automaton/content/videos/01M5DQDWVX9ZAFN8VQB4KV6KKY/video.mp4'"
     }
-  }
+  },
+  "renderFailed": true
 }
