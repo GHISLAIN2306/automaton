@@ -2722,6 +2722,61 @@ Model: ${ctx.inference.getDefaultModel()}
       },
     },
 
+    // ── Video Production Tools ──
+    {
+      name: "create_video",
+      description:
+        "Render a vertical short video (1080x1920) from a script into the review queue. Runs locally and costs nothing. " +
+        "The video is NOT published: your creator reviews every video. Write original scripts over 61 seconds of narration; " +
+        "near-duplicates of earlier videos are refused.",
+      category: "content",
+      riskLevel: "caution",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Video title" },
+          niche: { type: "string", description: "Niche or theme of the account" },
+          language: { type: "string", description: "Narration language code (default: fr)" },
+          scenes: {
+            type: "array",
+            description: "Scenes in order",
+            items: {
+              type: "object",
+              properties: {
+                narration: { type: "string", description: "Text read aloud" },
+                onScreen: { type: "string", description: "Short headline shown on screen" },
+              },
+              required: ["narration"],
+            },
+          },
+          caption: { type: "string", description: "Proposed post caption" },
+          hashtags: { type: "array", items: { type: "string" }, description: "Proposed hashtags" },
+        },
+        required: ["title", "niche", "scenes"],
+      },
+      execute: async (args) => {
+        const { createVideo } = await import("../video/review.js");
+        try {
+          const v = await createVideo(args);
+          const checks = v.checks.map((c) => `${c.passed ? "ok" : "FAILED"} ${c.name}: ${c.detail}`).join("\n");
+          return `Video ${v.id} rendered (${v.durationSec}s, cost $${(v.costCents / 100).toFixed(2)}), waiting for human review.\n${checks}`;
+        } catch (err: any) {
+          return `Video not created: ${err.message}`;
+        }
+      },
+    },
+    {
+      name: "list_videos",
+      description: "List rendered videos with their review status (pending_review, approved, rejected) and reviewer notes.",
+      category: "content",
+      riskLevel: "safe",
+      parameters: { type: "object", properties: {} },
+      execute: async () => {
+        const { formatVideoList, listVideos } = await import("../video/review.js");
+        return formatVideoList(listVideos());
+      },
+    },
+
     // ── x402 Payment Tool ──
     {
       name: "x402_fetch",

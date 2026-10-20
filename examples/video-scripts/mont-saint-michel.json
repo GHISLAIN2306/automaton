@@ -1,0 +1,46 @@
+{
+  "title": "Le Mont-Saint-Michel, une île qui n'en est presque plus une",
+  "niche": "patrimoine français",
+  "language": "fr",
+  "scenes": [
+    {
+      "onScreen": "Le Mont-Saint-Michel",
+      "narration": "Le Mont-Saint-Michel est l'un des sites les plus visités de France. Pourtant, pendant des siècles, il a failli perdre ce qui le rend unique : la mer."
+    },
+    {
+      "onScreen": "Des marées géantes",
+      "narration": "La baie du Mont-Saint-Michel connaît parmi les plus fortes marées d'Europe continentale. Lors des grandes marées, l'écart entre la marée basse et la marée haute peut dépasser quatorze mètres."
+    },
+    {
+      "onScreen": "Une abbaye née d'une légende",
+      "narration": "Selon la tradition, en l'an sept cent huit, l'évêque d'Avranches, Aubert, aurait reçu la visite de l'archange saint Michel, qui lui demandait de bâtir un sanctuaire sur ce rocher. L'abbaye s'est agrandie pendant tout le Moyen Âge."
+    },
+    {
+      "onScreen": "Une prison",
+      "narration": "Après la Révolution, l'abbaye devient une prison. Elle le restera jusqu'en mille huit cent soixante-trois, avant d'être classée monument historique quelques années plus tard."
+    },
+    {
+      "onScreen": "Une merveille gothique",
+      "narration": "Au sommet du rocher, les moines ont construit un ensemble de bâtiments sur plusieurs niveaux, que l'on surnomme la Merveille. Il a fallu tailler, empiler et accrocher la pierre à la pente pendant des générations."
+    },
+    {
+      "onScreen": "Le sable gagne",
+      "narration": "Au dix-neuvième et au vingtième siècle, une digue et des aménagements ont favorisé l'accumulation de sable autour du Mont. Peu à peu, l'île se transformait en presqu'île."
+    },
+    {
+      "onScreen": "La mer revient",
+      "narration": "Un grand chantier a donc été lancé pour rendre au Mont son caractère maritime. Un barrage sur le Couesnon chasse les sédiments, et une passerelle a remplacé l'ancienne digue en deux mille quatorze. Lors des plus grandes marées, le Mont redevient une île."
+    },
+    {
+      "onScreen": "À voir une fois",
+      "narration": "Si vous y allez, regardez les horaires des grandes marées avant de partir. Et ne traversez jamais la baie à pied sans un guide : les sables mouvants et la marée montante y sont réellement dangereux."
+    }
+  ],
+  "caption": "Pourquoi le Mont-Saint-Michel a failli ne plus être une île 🌊",
+  "hashtags": [
+    "#montsaintmichel",
+    "#patrimoine",
+    "#histoire",
+    "#france"
+  ]
+}
