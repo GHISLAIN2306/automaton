@@ -1,0 +1,46 @@
+{
+  "id": "01M5DQDWVX9ZAFN8VQB4KV6KKY",
+  "title": "L'incroyable arme secrète de la crevette-pistolet",
+  "niche": "Vulgarisation en français : sciences, nature, animaux, patrimoine et prouesses d'ingénierie, racontés comme une petite histoire surprenante et rigoureusement exacte",
+  "status": "approved",
+  "createdAt": "2026-10-20T22:41:14.897Z",
+  "durationSec": 86.4,
+  "costCents": 25.63,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "86.4 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "First video in the queue"
+    }
+  ],
+  "caption": "Saviez-vous qu'une crevette de quelques centimètres peut créer une température proche de celle du Soleil ? Découvrez la physique fascinante de la crevette-pistolet.",
+  "hashtags": [
+    "science",
+    "nature",
+    "animaux",
+    "biologie",
+    "decouverte"
+  ],
+  "reviewedAt": "2026-10-20T22:41:14.898Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "failed",
+      "at": "2026-10-20T22:41:15.004Z",
+      "error": "YouTube token refresh: HTTP 400: Bad Request"
+    }
+  }
+}
