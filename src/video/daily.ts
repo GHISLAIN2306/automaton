@@ -129,6 +129,27 @@ async function makeTodaysVideo(options: DailyOptions, dir: string, env: NodeJS.P
   throw lastError;
 }
 
+/**
+ * Renders an earlier video's script again under a new id. The old entry is
+ * kept as renderFailed so its cost still counts in the monthly budget and the
+ * near-duplicate check ignores it; posts already made are carried over.
+ */
+async function rerender(
+  previous: VideoManifest,
+  options: DailyOptions,
+  dir: string,
+  env: NodeJS.ProcessEnv,
+): Promise<VideoManifest> {
+  const script = JSON.parse(fs.readFileSync(path.join(dir, previous.id, "script.json"), "utf-8")) as VideoScript;
+  saveManifest(dir, { ...previous, renderFailed: true, reviewNote: "Video file missing; rendered again" });
+  const create = options.create ?? createVideo;
+  const fresh = await create(script, { dir, env });
+  if (!previous.publications) return fresh;
+  const carried = { ...fresh, publications: previous.publications };
+  saveManifest(dir, carried);
+  return carried;
+}
+
 export async function runDaily(options: DailyOptions = {}): Promise<DailyReport> {
   const env = options.env ?? process.env;
   const dir = options.dir ?? getVideosDir();
@@ -139,7 +160,13 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
   const report: DailyReport = { created: false, publishing, failures: [], renewedSecrets: {} };
 
   let video = listVideos(dir).find((v) => !v.renderFailed && v.status !== "rejected" && v.createdAt.startsWith(today));
-  if (video) {
+  if (video && !fs.existsSync(path.join(dir, video.id, "video.mp4"))) {
+    // Only scripts and manifests are kept between runs (the MP4 is not committed):
+    // render today's script again rather than writing a new one.
+    video = await rerender(video, options, dir, env);
+    report.created = true;
+    log(`Rendered today's script again as ${video.id}: ${video.durationSec}s`);
+  } else if (video) {
     log(`Reusing today's video ${video.id}: "${video.title}"`);
   } else {
     video = await makeTodaysVideo(options, dir, env);

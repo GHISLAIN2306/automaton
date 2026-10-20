@@ -82,7 +82,7 @@ describe("YouTube publisher", () => {
     const { impl } = fakeFetch([["oauth2", () => json({ error: "invalid_grant", error_description: "Token has been expired or revoked." }, 400)]]);
     await expect(
       new YouTubePublisher({ clientId: "i", clientSecret: "s", refreshToken: "r" }, { fetchImpl: impl }).publish(req),
-    ).rejects.toThrow(/expired or revoked/);
+    ).rejects.toThrow(/invalid_grant: Token has been expired or revoked/);
   });
 });
 
@@ -279,6 +279,32 @@ describe("daily run", () => {
     expect(second.failures).toEqual([]);
     const saved = JSON.parse(fs.readFileSync(path.join(dir, "vid1", "manifest.json"), "utf-8"));
     expect(saved.publications.tiktok.status).toBe("published");
+  });
+
+  it("renders today's script again when the video file is gone (fresh CI checkout)", async () => {
+    const yt = fakePublisher("youtube");
+    const tt = fakePublisher("tiktok", true);
+    const env = { AUTOMATON_PUBLISH: "true" };
+    const create = fakeCreate();
+    let written = 0;
+    const countingWriter = async () => {
+      written++;
+      return writer();
+    };
+    await runDaily({ env, now, dir, writer: countingWriter, create, publishers: [yt, tt] });
+    fs.rmSync(path.join(dir, "vid1", "video.mp4"));
+
+    const tt2 = fakePublisher("tiktok");
+    const report = await runDaily({ env, now, dir, writer: countingWriter, create, publishers: [yt, tt2] });
+    expect(written).toBe(1);
+    expect(report.video!.id).toBe("vid2");
+    expect(report.video!.title).toBe("Le viaduc");
+    expect(yt.seen).toHaveLength(1);
+    expect(tt2.seen[0].videoPath).toBe(path.join(dir, "vid2", "video.mp4"));
+    expect(report.video!.publications!.youtube!.status).toBe("published");
+    const old = JSON.parse(fs.readFileSync(path.join(dir, "vid1", "manifest.json"), "utf-8"));
+    expect(old.renderFailed).toBe(true);
+    expect(old.costCents).toBe(29);
   });
 
   it("does not post a video that fails its checks", async () => {

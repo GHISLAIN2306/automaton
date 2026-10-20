@@ -1,0 +1,44 @@
+name: Connexion TikTok
+
+# One-off: turns the code TikTok gives after you authorize the app into the
+# TIKTOK_REFRESH_TOKEN secret. Needs SECRETS_ADMIN_TOKEN (fine-grained token
+# with "Secrets: Read and write" on this repository).
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: "Adresse complète de la page où TikTok vous a renvoyé (ou le code seul)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  connect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Exchange the code
+        env:
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+          TIKTOK_REDIRECT_URI: ${{ vars.TIKTOK_REDIRECT_URI }}
+          TIKTOK_CODE: ${{ inputs.code }}
+        run: node scripts/tiktok-token.mjs "$RUNNER_TEMP/tiktok.json"
+      - name: Store TIKTOK_REFRESH_TOKEN
+        env:
+          GH_TOKEN: ${{ secrets.SECRETS_ADMIN_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Add the SECRETS_ADMIN_TOKEN secret first (see docs/publication-quotidienne.md)."
+            exit 1
+          fi
+          value=$(jq -r '.TIKTOK_REFRESH_TOKEN' "$RUNNER_TEMP/tiktok.json")
+          echo "::add-mask::$value"
+          gh secret set TIKTOK_REFRESH_TOKEN --repo "$GITHUB_REPOSITORY" --body "$value"
+          rm -f "$RUNNER_TEMP/tiktok.json"
+          echo "TIKTOK_REFRESH_TOKEN saved." >> "$GITHUB_STEP_SUMMARY"
