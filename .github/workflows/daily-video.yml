@@ -1,0 +1,97 @@
+name: Vidéo quotidienne
+
+# Each day: write a new script, render the video, post it to YouTube,
+# TikTok and Instagram. Scheduled runs only start once the repository
+# variable AUTOMATON_PUBLISH_ENABLED is "true" (Settings > Secrets and
+# variables > Actions > Variables); set it to "false" to stop the agent.
+on:
+  schedule:
+    - cron: "17 16 * * *" # 18:17 in Paris in summer, 17:17 in winter
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publier pour de vrai (sinon : essai, la vidéo est seulement fabriquée)"
+        type: boolean
+        default: false
+      topic:
+        description: "Sujet imposé (facultatif)"
+        required: false
+
+concurrency: daily-video
+
+permissions:
+  contents: write
+
+jobs:
+  video:
+    if: github.event_name == 'workflow_dispatch' || vars.AUTOMATON_PUBLISH_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: pnpm/action-setup@v4
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsc
+
+      - name: Make and publish today's video
+        env:
+          AUTOMATON_VIDEOS_DIR: ${{ github.workspace }}/content/videos
+          AUTOMATON_PUBLISH: ${{ (github.event_name == 'schedule' || inputs.publish) && 'true' || 'false' }}
+          AUTOMATON_TOPIC: ${{ inputs.topic }}
+          AUTOMATON_NICHE: ${{ vars.AUTOMATON_NICHE }}
+          AUTOMATON_RENEWED_SECRETS_FILE: ${{ runner.temp }}/renewed-secrets.json
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_PRIVACY: ${{ vars.YOUTUBE_PRIVACY }}
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+          TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
+          TIKTOK_PRIVACY: ${{ vars.TIKTOK_PRIVACY }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+        run: node dist/video/daily.js
+
+      - name: Keep the video for 30 days
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-${{ github.run_id }}
+          path: content/videos/*/video.mp4
+          if-no-files-found: ignore
+          retention-days: 30
+
+      # TikTok and Instagram tokens rotate. Storing the new ones needs a
+      # fine-grained token with "Secrets: read and write" on this repository.
+      - name: Store renewed tokens
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.SECRETS_ADMIN_TOKEN }}
+          FILE: ${{ runner.temp }}/renewed-secrets.json
+        run: |
+          [ -s "$FILE" ] || exit 0
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::Tokens were renewed but SECRETS_ADMIN_TOKEN is not set: they could not be saved."
+            exit 0
+          fi
+          for key in $(jq -r 'keys[]' "$FILE"); do
+            value=$(jq -r --arg k "$key" '.[$k]' "$FILE")
+            echo "::add-mask::$value"
+            gh secret set "$key" --repo "$GITHUB_REPOSITORY" --body "$value"
+          done
+          rm -f "$FILE"
+
+      - name: Save the history (scripts and results, not the videos)
+        if: always()
+        run: |
+          git config user.name "automaton-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content/videos
+          git diff --cached --quiet && exit 0
+          git commit -m "Daily video $(date -u +%F)"
+          git push

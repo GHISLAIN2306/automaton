@@ -56,6 +56,19 @@ export interface VideoManifest {
   checks: VideoCheck[];
   caption?: string;
   hashtags?: string[];
+  /** Where the video was posted, filled by the daily publisher. */
+  publications?: Partial<Record<Platform, PublicationRecord>>;
+}
+
+export type Platform = "youtube" | "tiktok" | "instagram";
+
+export interface PublicationRecord {
+  /** "private" when the platform only allowed a private post (unaudited app). */
+  status: "published" | "private" | "failed";
+  at: string;
+  id?: string;
+  url?: string;
+  error?: string;
 }
 
 export interface ImageProvider {

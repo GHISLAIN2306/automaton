@@ -23,10 +23,11 @@ const CHARS_PER_SECOND = 14;
 interface ContentBlock {
   type?: string;
   data?: string;
+  text?: string;
   mime_type?: string;
 }
 
-interface InteractionResponse {
+export interface InteractionResponse {
   steps?: Array<{ type?: string; content?: ContentBlock[] }>;
   error?: { message?: string };
 }
@@ -38,7 +39,7 @@ export interface GeminiOptions {
   timeoutMs?: number;
 }
 
-async function interact(body: unknown, options: GeminiOptions): Promise<InteractionResponse> {
+export async function interact(body: unknown, options: GeminiOptions): Promise<InteractionResponse> {
   const fetchImpl = options.fetchImpl ?? fetch;
   const resp = await fetchImpl(API_URL, {
     method: "POST",
@@ -55,6 +56,18 @@ async function interact(body: unknown, options: GeminiOptions): Promise<Interact
   }
   if (!resp.ok) throw new Error(`Gemini API error (HTTP ${resp.status}): ${json.error?.message ?? text.slice(0, 200)}`);
   return json;
+}
+
+/** Text of the model output steps, joined. */
+export function outputText(resp: InteractionResponse): string {
+  const text = (resp.steps ?? [])
+    .filter((s) => s.type === "model_output")
+    .flatMap((s) => s.content ?? [])
+    .filter((c) => c.type === "text" && typeof c.text === "string")
+    .map((c) => c.text)
+    .join("");
+  if (!text) throw new Error("Gemini API response contained no text");
+  return text;
 }
 
 /** Last block of `type` in the model output steps. */

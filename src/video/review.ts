@@ -25,7 +25,7 @@ import {
 } from "./types.js";
 
 export function getVideosDir(): string {
-  return path.join(getAutomatonDir(), "videos");
+  return process.env.AUTOMATON_VIDEOS_DIR || path.join(getAutomatonDir(), "videos");
 }
 
 export function validateScript(input: unknown): VideoScript {
