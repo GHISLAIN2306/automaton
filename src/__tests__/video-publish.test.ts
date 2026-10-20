@@ -82,7 +82,7 @@ describe("YouTube publisher", () => {
     const { impl } = fakeFetch([["oauth2", () => json({ error: "invalid_grant", error_description: "Token has been expired or revoked." }, 400)]]);
     await expect(
       new YouTubePublisher({ clientId: "i", clientSecret: "s", refreshToken: "r" }, { fetchImpl: impl }).publish(req),
-    ).rejects.toThrow(/expired or revoked/);
+    ).rejects.toThrow(/invalid_grant: Token has been expired or revoked/);
   });
 });
 

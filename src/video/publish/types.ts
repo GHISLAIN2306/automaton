@@ -49,7 +49,9 @@ export async function readJson<T = any>(resp: Response, what: string): Promise<T
     throw new Error(`${what}: HTTP ${resp.status}: ${text.slice(0, 300)}`);
   }
   if (!resp.ok) {
-    const message = json?.error?.message ?? json?.error_description ?? json?.error?.code ?? text.slice(0, 300);
+    // OAuth endpoints answer {error: "invalid_grant", error_description: "..."}; APIs answer {error: {message}}.
+    const code = typeof json?.error === "string" ? `${json.error}: ` : "";
+    const message = json?.error?.message ?? (json?.error_description ? code + json.error_description : undefined) ?? json?.error?.code ?? text.slice(0, 300);
     throw new Error(`${what}: HTTP ${resp.status}: ${typeof message === "string" ? message : JSON.stringify(message)}`);
   }
   return json as T;
