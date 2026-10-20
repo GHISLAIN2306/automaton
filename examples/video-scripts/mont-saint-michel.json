@@ -1,0 +1,54 @@
+{
+  "title": "Le Mont-Saint-Michel, une île qui n'en est presque plus une",
+  "niche": "patrimoine français",
+  "language": "fr",
+  "scenes": [
+    {
+      "onScreen": "Le Mont-Saint-Michel",
+      "narration": "Le Mont-Saint-Michel est l'un des sites les plus visités de France. Pourtant, pendant des siècles, il a failli perdre ce qui le rend unique : la mer.",
+      "visual": "Aerial view of Mont-Saint-Michel in Normandy at sunrise: the granite tidal island crowned by its Gothic abbey and spire with the golden statue of Saint Michael, surrounded by the sea"
+    },
+    {
+      "onScreen": "Des marées géantes",
+      "narration": "La baie du Mont-Saint-Michel connaît parmi les plus fortes marées d'Europe continentale. Lors des grandes marées, l'écart entre la marée basse et la marée haute peut dépasser quatorze mètres.",
+      "visual": "The bay of Mont-Saint-Michel at low tide: vast wet sand flats and tidal channels stretching to the horizon, the abbey island small in the distance"
+    },
+    {
+      "onScreen": "Une abbaye née d'une légende",
+      "narration": "Selon la tradition, en l'an sept cent huit, l'évêque d'Avranches, Aubert, aurait reçu la visite de l'archange saint Michel, qui lui demandait de bâtir un sanctuaire sur ce rocher. L'abbaye s'est agrandie pendant tout le Moyen Âge.",
+      "visual": "Medieval scene, early 8th century: a bishop in simple robes on a rocky granite outcrop by the sea in Normandy, a faint luminous archangel figure in the clouds above, painterly historical style"
+    },
+    {
+      "onScreen": "Une prison",
+      "narration": "Après la Révolution, l'abbaye devient une prison. Elle le restera jusqu'en mille huit cent soixante-trois, avant d'être classée monument historique quelques années plus tard.",
+      "visual": "Interior of a cold stone abbey hall used as a 19th-century prison: rows of rough wooden workbenches, barred windows, dim light"
+    },
+    {
+      "onScreen": "Une merveille gothique",
+      "narration": "Au sommet du rocher, les moines ont construit un ensemble de bâtiments sur plusieurs niveaux, que l'on surnomme la Merveille. Il a fallu tailler, empiler et accrocher la pierre à la pente pendant des générations.",
+      "visual": "The Gothic Merveille of Mont-Saint-Michel abbey seen from below: tall buttressed granite walls clinging to the steep rock"
+    },
+    {
+      "onScreen": "Le sable gagne",
+      "narration": "Au dix-neuvième et au vingtième siècle, une digue et des aménagements ont favorisé l'accumulation de sable autour du Mont. Peu à peu, l'île se transformait en presqu'île.",
+      "visual": "Mont-Saint-Michel seen from the land side, with salt meadows and sand accumulated around the mount, grazing sheep in the foreground"
+    },
+    {
+      "onScreen": "La mer revient",
+      "narration": "Un grand chantier a donc été lancé pour rendre au Mont son caractère maritime. Un barrage sur le Couesnon chasse les sédiments, et une passerelle a remplacé l'ancienne digue en deux mille quatorze. Lors des plus grandes marées, le Mont redevient une île.",
+      "visual": "The modern light pedestrian footbridge on piles leading to Mont-Saint-Michel at high tide, the sea flowing beneath it"
+    },
+    {
+      "onScreen": "À voir une fois",
+      "narration": "Si vous y allez, regardez les horaires des grandes marées avant de partir. Et ne traversez jamais la baie à pied sans un guide : les sables mouvants et la marée montante y sont réellement dangereux.",
+      "visual": "Tourists crossing the sand flats of the bay barefoot behind a guide, Mont-Saint-Michel in the background, overcast sky"
+    }
+  ],
+  "caption": "Pourquoi le Mont-Saint-Michel a failli ne plus être une île 🌊",
+  "hashtags": [
+    "#montsaintmichel",
+    "#patrimoine",
+    "#histoire",
+    "#france"
+  ]
+}

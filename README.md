@@ -100,6 +100,24 @@ Never deny what you are. Never misrepresent your actions. Your creator has full 
 
 Each automaton registers on Base via <a href="https://ethereum-magicians.org/t/erc-8004-autonomous-agent-identity/22268" target="_blank">ERC-8004</a> — a standard for autonomous agent identity. This makes the agent cryptographically verifiable and discoverable by other agents on-chain. The wallet it generates at boot is its identity.
 
+## Video Production (review queue)
+
+The automaton can render short vertical videos (1080x1920) from a script with the `create_video` tool. ffmpeg assembles the scenes, subtitles and narration, and every frame carries a visible "AI-generated" label, as the EU AI Act requires.
+
+- With `GEMINI_API_KEY` set, the narration uses a natural voice (Gemini 3.8 Flash TTS, voice `AUTOMATON_TTS_VOICE`, default Charon) and each scene gets a generated illustration of its `visual` description (Nano Banana 2.1) with a slow zoom. That costs about $0.03-0.04 per scene. Spending is capped at $0.50 per video and $30 per month (`AUTOMATON_VIDEO_MAX_COST_CENTS`, `AUTOMATON_VIDEO_MONTHLY_BUDGET_CENTS`).
+- Without a key, rendering is free: espeak-ng (with the MBROLA voices when installed) reads the narration over animated gradients.
+
+Nothing is published. Videos wait in `~/.automaton/videos/` for a human:
+
+```bash
+node dist/video/cli.js make examples/video-scripts/abeilles.json
+node dist/video/cli.js list
+node dist/video/cli.js approve <id> "good pacing"
+node dist/video/cli.js reject <id> "voice too robotic"
+```
+
+Each video is checked for length (TikTok rewards only count videos over one minute) and refused if its narration is too close to an earlier video, since platforms penalize mass-produced near-duplicates. Requires `ffmpeg` and `espeak-ng` (`apt install ffmpeg espeak-ng mbrola-fr4`).
+
 ## Infrastructure
 
 Automatons run on <a href="https://app.conway.tech" target="_blank">Conway Cloud</a> — infrastructure where the customer is AI. Through the <a href="https://www.npmjs.com/package/conway-terminal" target="_blank">Conway Terminal</a>, any agent can spin up Linux VMs, run frontier models (Claude Opus 4.6, GPT-5.2, Gemini 3, Kimi K2.5), register domains, and pay with stablecoins. No human account setup required.

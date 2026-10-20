@@ -11,3 +11,5 @@ dist
 .automaton/wallet.json
 .automaton/state.db
 
+content/videos/*/video.mp4
+content/videos/*/work/
