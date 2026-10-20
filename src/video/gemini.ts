@@ -132,7 +132,7 @@ export class GeminiImage implements ImageProvider {
       {
         model: this.model,
         input: prompt,
-        response_format: { type: "image", mime_type: "image/png", aspect_ratio: "9:16", image_size: "1K" },
+        response_format: { type: "image", mime_type: "image/jpeg", aspect_ratio: "9:16", image_size: "1K" },
       },
       this.options,
     );
