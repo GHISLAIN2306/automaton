@@ -61,6 +61,14 @@ describe("SimulationLedger", () => {
     expect(ledger.getBalanceCents()).toBe(0);
   });
 
+  it("keeps fractional inference costs free of float noise", () => {
+    ledger.seed(500);
+    for (let i = 0; i < 3; i++) ledger.charge("inference", 1.6, "Turn");
+    const s = ledger.summary();
+    expect(s.inferenceCents).toBe(4.8);
+    expect(s.balanceCents).toBe(495.2);
+  });
+
   it("formats a readable report", () => {
     ledger.seed(500);
     ledger.credit(25, "Sale: echo");

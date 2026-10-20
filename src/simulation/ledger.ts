@@ -44,6 +44,11 @@ const SCHEMA = `
   CREATE INDEX IF NOT EXISTS idx_simulation_ledger_kind ON simulation_ledger(kind);
 `;
 
+/** Fractional cents (token-priced inference) are kept to 1/10000 of a cent. */
+function roundCents(cents: number): number {
+  return Math.round(cents * 10_000) / 10_000;
+}
+
 export class SimulationLedger {
   constructor(private readonly db: Database) {
     db.exec(SCHEMA);
@@ -62,7 +67,7 @@ export class SimulationLedger {
     const entry: LedgerEntry = {
       id: ulid(),
       kind,
-      amountCents,
+      amountCents: roundCents(amountCents),
       note,
       createdAt: new Date().toISOString(),
     };
@@ -78,7 +83,7 @@ export class SimulationLedger {
     const row = this.db
       .prepare("SELECT COALESCE(SUM(amount_cents), 0) AS total FROM simulation_ledger")
       .get() as { total: number };
-    return Math.max(0, row.total);
+    return Math.max(0, roundCents(row.total));
   }
 
   /**
@@ -116,11 +121,11 @@ export class SimulationLedger {
     const expenseCents = -(by("expense")?.total ?? 0);
     return {
       balanceCents: this.getBalanceCents(),
-      revenueCents,
-      inferenceCents,
-      expenseCents,
+      revenueCents: roundCents(revenueCents),
+      inferenceCents: roundCents(inferenceCents),
+      expenseCents: roundCents(expenseCents),
       seedCents: by("seed")?.total ?? 0,
-      profitCents: revenueCents - inferenceCents - expenseCents,
+      profitCents: roundCents(revenueCents - inferenceCents - expenseCents),
       sales: by("revenue")?.n ?? 0,
     };
   }
