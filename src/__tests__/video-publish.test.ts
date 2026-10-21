@@ -132,6 +132,24 @@ describe("TikTok publisher", () => {
     expect(JSON.parse(calls.find((c) => c.url.includes("/video/init/"))!.body).post_info.privacy_level).toBe("SELF_ONLY");
   });
 
+  it("uploads a video over 64 MB in chunks, the last one taking the remainder", async () => {
+    const big = path.join(os.tmpdir(), `tiktok-big-${process.pid}.mp4`);
+    const size = 75 * 1024 * 1024 + 123;
+    fs.writeFileSync(big, Buffer.alloc(size));
+    try {
+      const { impl, calls } = routes(["SELF_ONLY"], ["PUBLISH_COMPLETE"]);
+      await new TikTokPublisher({ clientKey: "k", clientSecret: "s", refreshToken: "r" }, { fetchImpl: impl, sleep: async () => {} }).publish({ ...req, videoPath: big });
+      const init = JSON.parse(calls.find((c) => c.url.includes("/video/init/"))!.body);
+      expect(init.source_info).toEqual({ source: "FILE_UPLOAD", video_size: size, chunk_size: 10 * 1024 * 1024, total_chunk_count: 7 });
+      const ranges = calls.filter((c) => c.url.includes("upload.tiktok")).map((c) => c.headers["content-range"]);
+      expect(ranges).toHaveLength(7);
+      expect(ranges[0]).toBe(`bytes 0-${10 * 1024 * 1024 - 1}/${size}`);
+      expect(ranges[6]).toBe(`bytes ${60 * 1024 * 1024}-${size - 1}/${size}`);
+    } finally {
+      fs.rmSync(big, { force: true });
+    }
+  });
+
   it("fails when TikTok rejects the post", async () => {
     const { impl } = routes(["PUBLIC_TO_EVERYONE"], ["FAILED"]);
     await expect(
