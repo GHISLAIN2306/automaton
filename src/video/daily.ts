@@ -4,10 +4,11 @@
  *
  *   node dist/video/daily.js
  *
- * Once a day: writes a new script for the niche, renders it (voice, images,
- * AI label), then posts it to every platform whose credentials are set.
- * Running it twice the same day reuses that day's video and only retries
- * the platforms that failed.
+ * Writes a new script for the niche, renders it (voice, images, AI label),
+ * then posts it to every platform whose credentials are set. At most
+ * AUTOMATON_VIDEOS_PER_DAY videos (default 1) are made per UTC day: a run
+ * first retries any of today's videos still missing a platform, and only
+ * makes a new one when all of today's are posted.
  *
  * Nothing is posted unless AUTOMATON_PUBLISH=true: without it the run makes
  * the video and stops (dry run). Spending caps from review.ts still apply.
@@ -159,19 +160,29 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
   const publishing = env.AUTOMATON_PUBLISH === "true";
   const report: DailyReport = { created: false, publishing, failures: [], renewedSecrets: {} };
 
-  let video = listVideos(dir).find((v) => !v.renderFailed && v.status !== "rejected" && v.createdAt.startsWith(today));
+  const perDay = Math.max(1, Number.parseInt(env.AUTOMATON_VIDEOS_PER_DAY ?? "", 10) || 1);
+  const publishers = options.publishers ?? publishersFromEnv(env);
+  const todays = listVideos(dir).filter((v) => !v.renderFailed && v.status !== "rejected" && v.createdAt.startsWith(today));
+  const unfinished = (v: VideoManifest) => publishers.some((p) => (v.publications?.[p.platform]?.status ?? "failed") === "failed");
+
+  let video = todays.find(unfinished);
+  if (!video && todays.length >= perDay) {
+    log(`Today's ${todays.length} video(s) already posted (limit ${perDay} per day).`);
+    report.video = todays[todays.length - 1];
+    return report;
+  }
   if (video && !fs.existsSync(path.join(dir, video.id, "video.mp4"))) {
     // Only scripts and manifests are kept between runs (the MP4 is not committed):
-    // render today's script again rather than writing a new one.
+    // render that script again rather than writing a new one.
     video = await rerender(video, options, dir, env);
     report.created = true;
-    log(`Rendered today's script again as ${video.id}: ${video.durationSec}s`);
+    log(`Rendered ${video.title} again as ${video.id}: ${video.durationSec}s`);
   } else if (video) {
     log(`Reusing today's video ${video.id}: "${video.title}"`);
   } else {
     video = await makeTodaysVideo(options, dir, env);
     report.created = true;
-    log(`Rendered ${video.id}: ${video.durationSec}s, $${(video.costCents / 100).toFixed(2)}`);
+    log(`Rendered ${video.id} (${todays.length + 1}/${perDay} today): ${video.durationSec}s, $${(video.costCents / 100).toFixed(2)}`);
   }
   report.video = video;
 
@@ -187,7 +198,6 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
     return report;
   }
 
-  const publishers = options.publishers ?? publishersFromEnv(env);
   if (publishers.length === 0) {
     report.failures.push("no platform credentials set");
     return report;

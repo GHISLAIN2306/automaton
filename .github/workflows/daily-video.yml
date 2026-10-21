@@ -1,11 +1,13 @@
 name: Vidéo quotidienne
 
-# Each day: write a new script, render the video, post it to YouTube,
-# TikTok and Instagram. Scheduled runs only start once the repository
+# Twice a day: write a new script, render the video, post it to YouTube,
+# TikTok and Instagram (AUTOMATON_VIDEOS_PER_DAY, default 2, caps the
+# number of videos per day). Scheduled runs only start once the repository
 # variable AUTOMATON_PUBLISH_ENABLED is "true" (Settings > Secrets and
 # variables > Actions > Variables); set it to "false" to stop the agent.
 on:
   schedule:
+    - cron: "17 10 * * *" # 12:17 in Paris in summer, 11:17 in winter
     - cron: "17 16 * * *" # 18:17 in Paris in summer, 17:17 in winter
   workflow_dispatch:
     inputs:
@@ -42,6 +44,7 @@ jobs:
           AUTOMATON_VIDEOS_DIR: ${{ github.workspace }}/content/videos
           AUTOMATON_PUBLISH: ${{ (github.event_name == 'schedule' || inputs.publish) && 'true' || 'false' }}
           AUTOMATON_TOPIC: ${{ inputs.topic }}
+          AUTOMATON_VIDEOS_PER_DAY: ${{ vars.AUTOMATON_VIDEOS_PER_DAY || '2' }}
           AUTOMATON_NICHE: ${{ vars.AUTOMATON_NICHE }}
           AUTOMATON_RENEWED_SECRETS_FILE: ${{ runner.temp }}/renewed-secrets.json
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
