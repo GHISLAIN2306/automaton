@@ -1,0 +1,47 @@
+{
+  "id": "01M5FTQ97VG8EEBRPMKCTQXARG",
+  "title": "Ils le prenaient pour un simple forgeron. Grosse erreur. | Épisode 1",
+  "niche": "L'Invincible Forgeron",
+  "status": "approved",
+  "createdAt": "2026-10-21T18:14:06.844Z",
+  "durationSec": 175,
+  "costCents": 0,
+  "visuals": "clip",
+  "aiLabel": "",
+  "voice": "original",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "175.0 s (Shorts: 180 s max)"
+    }
+  ],
+  "caption": "Tu veux savoir la suite ? 👀 Lien en bio, série n° 2 🎬",
+  "hashtags": [
+    "minisérie",
+    "drama",
+    "fantasy",
+    "épée",
+    "dramaexpress"
+  ],
+  "source": "clip",
+  "hook": "Ils le prenaient pour un simple forgeron. Grosse erreur.",
+  "dramaId": "637654",
+  "episode": 1,
+  "pack": "https://cps-distr.ikyuedu.com/distribution/11/DramaBox资源包-42000025093-f6c8769ada6b35c9aade872504ca24d2.zip",
+  "reviewedAt": "2026-10-21T18:15:32.321Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-10-21T18:15:38.229Z",
+      "id": "oYkPxHz3q54",
+      "url": "https://www.youtube.com/shorts/oYkPxHz3q54"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-10-21T18:15:39.256Z",
+      "error": "Video is 75 MB, over the 64 MB single-upload limit"
+    }
+  }
+}
