@@ -35,7 +35,7 @@
     "vulgarisation"
   ],
   "reviewedAt": "2026-10-21T00:08:18.280Z",
-  "reviewNote": "Publication automatique",
+  "reviewNote": "Video file missing; rendered again",
   "publications": {
     "youtube": {
       "status": "published",
@@ -43,5 +43,6 @@
       "id": "klMej7SQ86s",
       "url": "https://www.youtube.com/shorts/klMej7SQ86s"
     }
-  }
+  },
+  "renderFailed": true
 }

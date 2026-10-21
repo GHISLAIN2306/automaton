@@ -33,5 +33,7 @@
     "miniserie",
     "drama",
     "histoire"
-  ]
+  ],
+  "renderFailed": true,
+  "reviewNote": "Video file missing; rendered again"
 }

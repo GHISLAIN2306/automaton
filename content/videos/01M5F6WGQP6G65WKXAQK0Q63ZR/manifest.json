@@ -1,0 +1,42 @@
+{
+  "id": "01M5F6WGQP6G65WKXAQK0Q63ZR",
+  "title": "Tout le monde la prenait pour une louve ratée. Grosse erreur. | Épisode 1",
+  "niche": "La Petite Louve qui Renversa le Destin de la Meute",
+  "status": "approved",
+  "createdAt": "2026-10-21T12:27:26.838Z",
+  "durationSec": 175,
+  "costCents": 0,
+  "visuals": "clip",
+  "aiLabel": "",
+  "voice": "original",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "175.0 s (Shorts: 180 s max)"
+    }
+  ],
+  "caption": "Tu veux savoir la suite ? 👀 Lien en bio, série n° 1 🎬",
+  "hashtags": [
+    "minisérie",
+    "drama",
+    "loupgarou",
+    "vengeance",
+    "dramaexpress"
+  ],
+  "source": "clip",
+  "hook": "Tout le monde la prenait pour une louve ratée. Grosse erreur.",
+  "dramaId": "653763",
+  "episode": 1,
+  "pack": "https://cps-distr.ikyuedu.com/distribution/8/DramaBox资源包-42000029109-e7a97e780e8cdfd05621d86ce95e4b0a.zip",
+  "reviewedAt": "2026-10-21T12:28:26.679Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-10-21T12:28:28.756Z",
+      "id": "OJiMbRPZV8I",
+      "url": "https://www.youtube.com/shorts/OJiMbRPZV8I"
+    }
+  }
+}
