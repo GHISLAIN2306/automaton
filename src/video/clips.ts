@@ -18,7 +18,9 @@ import { execFile } from "child_process";
 import fs from "fs";
 import path from "path";
 import { promisify } from "util";
+import os from "os";
 import { ulid } from "ulid";
+import { downloadEpisode } from "./dramacps.js";
 import { filterPath, findFont, probeDuration, wrapText } from "./render.js";
 import { registerSeries } from "./series.js";
 import type { VideoCheck, VideoManifest } from "./types.js";
@@ -42,6 +44,9 @@ export interface ClipInfo {
   /** DramaCPS "Drama URL" of the series, listed on the bio link page. */
   dramaUrl?: string;
   dramaId?: string;
+  /** Set for an episode downloaded from a DramaCPS resource pack (not kept in git). */
+  pack?: string;
+  episode?: number;
 }
 
 export function getClipsDir(videosDir: string): string {
@@ -85,7 +90,8 @@ export async function frameClip(source: string, hook: string, outFile: string): 
           `drawtext=fontfile='${font}':textfile='${filterPath(hookFile)}':fontsize=78:fontcolor=white:` +
           "line_spacing=16:box=1:boxcolor=black@0.6:boxborderw=26:x=(w-text_w)/2:y=h*0.16:" +
           `enable='lt(t,${HOOK_SECONDS})',format=yuv420p`,
-        "-c:v", "libx264", "-preset", "veryfast", "-crf", "21",
+        "-t", String(MAX_CLIP_SECONDS - 5),
+        "-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
         "-c:a", "aac", "-b:a", "128k", "-ac", "2",
         "-movflags", "+faststart",
         outFile,
@@ -104,15 +110,20 @@ export interface PrepareClipOptions {
   clipsDir: string;
   /** Replaced in tests. */
   frame?: typeof frameClip;
+  download?: typeof downloadEpisode;
 }
 
 /** Takes a clip from the inbox and makes it today's video. */
 export async function prepareClip(clip: ClipInfo, options: PrepareClipOptions): Promise<VideoManifest> {
   const id = ulid();
-  const pending = path.join(options.clipsDir, "en-cours", `${id}.mp4`);
-  fs.mkdirSync(path.dirname(pending), { recursive: true });
-  fs.renameSync(clip.file, pending);
-  fs.rmSync(clip.file.replace(/\.mp4$/i, ".json"), { force: true });
+  // Inbox clips are small and kept in git until posted; pack episodes are
+  // large and downloaded again when needed.
+  const pending = clip.pack ? undefined : path.join(options.clipsDir, "en-cours", `${id}.mp4`);
+  if (pending) {
+    fs.mkdirSync(path.dirname(pending), { recursive: true });
+    fs.renameSync(clip.file, pending);
+    fs.rmSync(clip.file.replace(/\.mp4$/i, ".json"), { force: true });
+  }
 
   const hook = clip.hook || DEFAULT_CLIP_HOOK;
   const series = clip.series || path.basename(clip.file, path.extname(clip.file));
@@ -120,7 +131,10 @@ export async function prepareClip(clip: ClipInfo, options: PrepareClipOptions): 
   const caption = clip.caption || (number ? `Tu veux savoir la suite ? 👀 Lien en bio, série n° ${number} 🎬` : DEFAULT_CLIP_CAPTION);
   const manifest: VideoManifest = {
     id,
-    title: drawable(clip.hook || series).slice(0, 90),
+    title: (clip.episode
+      ? `${clip.hook ? drawable(clip.hook) : series} | Épisode ${clip.episode}`
+      : drawable(clip.hook || series)
+    ).slice(0, 90),
     niche: series,
     status: "pending_review",
     createdAt: new Date().toISOString(),
@@ -133,19 +147,41 @@ export async function prepareClip(clip: ClipInfo, options: PrepareClipOptions): 
     caption,
     hashtags: clip.hashtags?.length ? clip.hashtags : DEFAULT_CLIP_HASHTAGS,
     source: "clip",
-    clipFile: path.relative(options.clipsDir, pending),
+    clipFile: pending && path.relative(options.clipsDir, pending),
     hook,
+    dramaId: clip.dramaId,
+    episode: clip.episode,
+    pack: clip.pack,
   };
-  return frameManifest(manifest, options);
+  try {
+    return await frameManifest(manifest, options, clip.pack ? clip.file : undefined);
+  } finally {
+    if (clip.pack) fs.rmSync(clip.file, { force: true });
+  }
 }
 
 /** Frames (again) the clip behind a manifest, e.g. on a fresh checkout. */
-export async function frameManifest(manifest: VideoManifest, options: PrepareClipOptions): Promise<VideoManifest> {
+export async function frameManifest(manifest: VideoManifest, options: PrepareClipOptions, downloaded?: string): Promise<VideoManifest> {
   const videoDir = path.join(options.dir, manifest.id);
   fs.mkdirSync(videoDir, { recursive: true });
-  const source = path.join(options.clipsDir, manifest.clipFile!);
-  if (!fs.existsSync(source)) throw new Error(`Clip file missing: ${manifest.clipFile}`);
-  const duration = await (options.frame ?? frameClip)(source, manifest.hook || DEFAULT_CLIP_HOOK, path.join(videoDir, "video.mp4"));
+  let source = downloaded ?? (manifest.clipFile ? path.join(options.clipsDir, manifest.clipFile) : undefined);
+  let temporary: string | undefined;
+  if (!source && manifest.pack && manifest.episode) {
+    temporary = path.join(os.tmpdir(), `episode-${manifest.id}.mp4`);
+    await (options.download ?? downloadEpisode)(
+      { dramaId: manifest.dramaId ?? "", title: manifest.niche, pack: manifest.pack },
+      manifest.episode,
+      temporary,
+    );
+    source = temporary;
+  }
+  if (!source || !fs.existsSync(source)) throw new Error(`Clip file missing: ${manifest.clipFile ?? manifest.id}`);
+  let duration: number;
+  try {
+    duration = await (options.frame ?? frameClip)(source, manifest.hook || DEFAULT_CLIP_HOOK, path.join(videoDir, "video.mp4"));
+  } finally {
+    if (temporary) fs.rmSync(temporary, { force: true });
+  }
   const checks: VideoCheck[] = [
     { name: "duration", passed: duration > 0 && duration <= MAX_CLIP_SECONDS, detail: `${duration.toFixed(1)} s (Shorts: ${MAX_CLIP_SECONDS} s max)` },
   ];

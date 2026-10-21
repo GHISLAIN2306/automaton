@@ -64,6 +64,11 @@ export interface VideoManifest {
   clipFile?: string;
   /** Text shown on screen during the first seconds of a partner clip. */
   hook?: string;
+  /** DramaCPS series and episode, when the clip comes from a resource pack. */
+  dramaId?: string;
+  episode?: number;
+  /** Resource pack URL, to download the episode again on a fresh checkout. */
+  pack?: string;
   /** Where the video was posted, filled by the daily publisher. */
   publications?: Partial<Record<Platform, PublicationRecord>>;
 }

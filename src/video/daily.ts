@@ -17,7 +17,9 @@
 import fs from "fs";
 import path from "path";
 import { createVideo, getVideosDir, listVideos, setVideoStatus } from "./review.js";
-import { frameManifest, getClipsDir, listInbox, prepareClip, releaseClip, type PrepareClipOptions } from "./clips.js";
+import os from "os";
+import { frameManifest, getClipsDir, listInbox, prepareClip, releaseClip, type ClipInfo, type PrepareClipOptions } from "./clips.js";
+import { loadPackSeries, nextPackEpisode } from "./dramacps.js";
 import { DEFAULT_NICHES, formatFromEnv, writeScript, type WriteScriptOptions } from "./writer.js";
 import { InstagramPublisher } from "./publish/instagram.js";
 import { TikTokPublisher } from "./publish/tiktok.js";
@@ -38,8 +40,9 @@ export interface DailyOptions {
   publishers?: Publisher[];
   log?: (message: string) => void;
   clipsDir?: string;
-  /** Frames partner clips; replaced in tests. */
+  /** Frames partner clips and downloads pack episodes; replaced in tests. */
   frame?: PrepareClipOptions["frame"];
+  download?: PrepareClipOptions["download"];
 }
 
 export interface DailyReport {
@@ -92,10 +95,14 @@ export function publishersFromEnv(env: NodeJS.ProcessEnv = process.env, http: Ht
   return publishers;
 }
 
-export function buildDescription(video: Pick<VideoManifest, "title" | "caption" | "hashtags" | "source">, fiction = false): string {
+export function buildDescription(video: Pick<VideoManifest, "title" | "caption" | "hashtags" | "source"> & { niche?: string }, fiction = false): string {
   const tags = (video.hashtags ?? []).map((t) => `#${t.replace(/^#/, "").replace(/\s+/g, "")}`);
   // Partner clips are real footage: no AI notice.
-  if (video.source === "clip") return [video.caption || video.title, tags.join(" ")].filter(Boolean).join("\n\n");
+  if (video.source === "clip") {
+    return [video.caption || video.title, video.niche ? `Extrait de la série « ${video.niche} »` : "", tags.join(" ")]
+      .filter(Boolean)
+      .join("\n\n");
+  }
   const notice = fiction ? `${FICTION_NOTICE} ${AI_NOTICE}` : AI_NOTICE;
   return [video.caption || video.title, notice, [...tags, "#IA"].join(" ")].join("\n\n");
 }
@@ -184,21 +191,23 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
   const clipsPerDay = intFromEnv(env.AUTOMATON_CLIPS_PER_DAY, 2);
   const aiOnlyPerDay = intFromEnv(env.AUTOMATON_AI_ONLY_PER_DAY, 2);
   const clipsDir = options.clipsDir ?? getClipsDir(dir);
-  const clipOptions: PrepareClipOptions = { dir, clipsDir, frame: options.frame };
+  const clipOptions: PrepareClipOptions = { dir, clipsDir, frame: options.frame, download: options.download };
   const publishers = options.publishers ?? publishersFromEnv(env);
   const todays = listVideos(dir).filter((v) => !v.renderFailed && v.status !== "rejected" && v.createdAt.startsWith(today));
   const unfinished = (v: VideoManifest) => publishers.some((p) => (v.publications?.[p.platform]?.status ?? "failed") === "failed");
   const clipsToday = todays.filter((v) => v.source === "clip").length;
   const aiToday = todays.length - clipsToday;
   const inbox = listInbox(clipsDir);
+  const packNext = nextPackEpisode(loadPackSeries(clipsDir), listVideos(dir));
+  const clipsWaiting = inbox.length + (packNext ? 1 : 0);
 
   let video = todays.find(unfinished);
   let kind: "clip" | "ai" | undefined;
   if (!video && todays.length < perDay) {
     // Partner clips first (they earn commissions), then AI videos: fewer of
     // them once clips are coming in, so the clips keep most of the slots.
-    const aiLimit = clipsToday + inbox.length > 0 ? perDay - clipsPerDay : aiOnlyPerDay;
-    if (inbox.length && clipsToday < clipsPerDay) kind = "clip";
+    const aiLimit = clipsToday + clipsWaiting > 0 ? perDay - clipsPerDay : aiOnlyPerDay;
+    if (clipsWaiting && clipsToday < clipsPerDay) kind = "clip";
     else if (aiToday < aiLimit) kind = "ai";
   }
   if (!video && !kind) {
@@ -215,9 +224,19 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
   } else if (video) {
     log(`Reusing today's video ${video.id}: "${video.title}"`);
   } else if (kind === "clip") {
-    video = await prepareClip(inbox[0], clipOptions);
+    let clip: ClipInfo;
+    if (inbox.length) {
+      clip = inbox[0];
+    } else {
+      // Hand-dropped clips go first; otherwise the next episode of a listed series.
+      const { series, episode } = packNext!;
+      const file = path.join(os.tmpdir(), `pack-${series.dramaId}-${episode}.mp4`);
+      await (options.download ?? (await import("./dramacps.js")).downloadEpisode)(series, episode, file);
+      clip = { file, series: series.title, hook: series.hook, hashtags: series.hashtags, dramaUrl: series.dramaUrl, dramaId: series.dramaId, pack: series.pack, episode };
+    }
+    video = await prepareClip(clip, clipOptions);
     report.created = true;
-    log(`Framed partner clip ${video.id} (${video.niche}): ${video.durationSec}s, ${inbox.length - 1} left in the inbox`);
+    log(`Framed partner clip ${video.id} (${video.niche}${video.episode ? `, episode ${video.episode}` : ""}): ${video.durationSec}s`);
   } else {
     video = await makeTodaysVideo(options, dir, env);
     report.created = true;

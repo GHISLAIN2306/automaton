@@ -395,6 +395,41 @@ describe("daily run", () => {
     expect(page).toContain('href="https://d.example/2"');
   });
 
+  it("posts the next episodes of the listed DramaCPS series, alternating series", async () => {
+    const clipsDir = path.join(tmp, "clips");
+    fs.mkdirSync(clipsDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(clipsDir, "series-a-publier.json"),
+      JSON.stringify([
+        { dramaId: "653763", title: "La Petite Louve", dramaUrl: "https://r.example/louve", pack: "https://p.example/louve.zip", hook: "Elle était la louve ratée de la meute…", episodes: 2 },
+        { dramaId: "658667", title: "La Femme que Tu As Jetée", dramaUrl: "https://r.example/femme", pack: "https://p.example/femme.zip" },
+      ]),
+    );
+    const downloads: string[] = [];
+    const download = async (series: { dramaId: string }, episode: number, out: string) => {
+      downloads.push(`${series.dramaId}#${episode}`);
+      fs.writeFileSync(out, "episode");
+    };
+    const frame = async (_s: string, _h: string, out: string) => (fs.writeFileSync(out, "mp4"), 90);
+    const yt = fakePublisher("youtube");
+    const env = { AUTOMATON_PUBLISH: "true", AUTOMATON_VIDEOS_PER_DAY: "6", AUTOMATON_CLIPS_PER_DAY: "5" };
+    for (let i = 0; i < 4; i++) await runDaily({ env, now, dir, writer, create: fakeCreate(), publishers: [yt], clipsDir, frame, download });
+    expect(downloads).toEqual(["653763#1", "658667#1", "653763#2", "658667#2"]);
+    expect(yt.seen[0].title).toBe("Elle était la louve ratée de la meute… | Épisode 1");
+    expect(yt.seen[1].description).toContain("série n° 2");
+    // Pack episodes are not kept in the repository.
+    expect(fs.existsSync(path.join(clipsDir, "en-cours"))).toBe(false);
+
+    // A fresh checkout downloads the episode again to retry a failed platform.
+    const fifth = await runDaily({ env, now, dir, writer, create: fakeCreate(), publishers: [fakePublisher("youtube", true)], clipsDir, frame, download });
+    expect(downloads.at(-1)).toBe("658667#3");
+    fs.rmSync(path.join(dir, fifth.video!.id, "video.mp4"));
+    const retry = await runDaily({ env, now, dir, writer, create: fakeCreate(), publishers: [yt], clipsDir, frame, download });
+    expect(retry.video!.id).toBe(fifth.video!.id);
+    expect(downloads.at(-1)).toBe("658667#3");
+    expect(downloads).toHaveLength(6);
+  });
+
   it("frames a clip again on a fresh checkout and keeps it until posted everywhere", async () => {
     const clipsDir = path.join(tmp, "clips");
     fs.mkdirSync(path.join(clipsDir, "a-publier"), { recursive: true });
