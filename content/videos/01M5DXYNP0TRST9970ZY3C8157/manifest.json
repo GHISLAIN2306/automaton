@@ -1,0 +1,37 @@
+{
+  "id": "01M5DXYNP0TRST9970ZY3C8157",
+  "title": "Le lourd secret caché dans le coffre de son père",
+  "niche": "Mini-drames originaux en français : secrets de famille, trahisons, amours contrariées, revanches et retournements de situation dans la vie de tous les jours",
+  "status": "pending_review",
+  "createdAt": "2026-10-21T00:35:28.009Z",
+  "durationSec": 88.8,
+  "costCents": 25.57,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "88.8 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "Closest earlier video: \"La grenouille qui ressuscite chaque hiver\" (0% overlap)"
+    }
+  ],
+  "caption": "Thomas pensait connaître la femme de sa vie jusqu'à ce secret enfoui. Et vous, vous pourriez encore lui faire confiance ?",
+  "hashtags": [
+    "secretdefamille",
+    "trahison",
+    "miniserie",
+    "drama",
+    "histoire"
+  ]
+}
