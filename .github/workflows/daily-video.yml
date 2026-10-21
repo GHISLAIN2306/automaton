@@ -49,6 +49,8 @@ jobs:
           AUTOMATON_PUBLISH: ${{ (github.event_name == 'schedule' || inputs.publish) && 'true' || 'false' }}
           AUTOMATON_TOPIC: ${{ inputs.topic }}
           AUTOMATON_VIDEOS_PER_DAY: ${{ vars.AUTOMATON_VIDEOS_PER_DAY || '3' }}
+          # Minutes between two new videos (a late schedule after a manual run).
+          AUTOMATON_MIN_GAP_MINUTES: '90'
           AUTOMATON_NICHE: ${{ vars.AUTOMATON_NICHE }}
           AUTOMATON_FORMAT: ${{ vars.AUTOMATON_FORMAT }}
           YOUTUBE_CATEGORY_ID: ${{ vars.YOUTUBE_CATEGORY_ID }}
