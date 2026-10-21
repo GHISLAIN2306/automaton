@@ -19,10 +19,9 @@ export interface YouTubeCredentials {
   refreshToken: string;
   /** "public" (default), "unlisted" or "private". */
   privacy?: string;
+  /** YouTube category: "27" Education (default), "24" Entertainment. */
+  categoryId?: string;
 }
-
-/** Education. */
-const CATEGORY_ID = "27";
 
 export class YouTubePublisher implements Publisher {
   readonly platform = "youtube" as const;
@@ -72,7 +71,7 @@ export class YouTubePublisher implements Publisher {
             title,
             description: req.description.slice(0, 5000),
             tags: req.hashtags,
-            categoryId: CATEGORY_ID,
+            categoryId: this.creds.categoryId || "27",
             defaultLanguage: "fr",
             defaultAudioLanguage: "fr",
           },

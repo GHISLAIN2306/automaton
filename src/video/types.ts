@@ -25,6 +25,8 @@ export interface VideoScript {
   /** Caption proposed for the post. */
   caption?: string;
   hashtags?: string[];
+  /** Invented story: images are styled as a film, not as documentary. */
+  fiction?: boolean;
 }
 
 export type VideoStatus = "pending_review" | "approved" | "rejected";

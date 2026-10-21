@@ -174,6 +174,15 @@ describe("script writer", () => {
     expect(prompt).toContain("JSON");
   });
 
+  it("writes invented dramas by default and true stories in vulgarisation format", () => {
+    const drama = scriptPrompt({ apiKey: "" });
+    expect(drama).toContain("Histoire entièrement inventée");
+    expect(drama).toContain("même apparence");
+    const facts = scriptPrompt({ apiKey: "", format: "vulgarisation" });
+    expect(facts).toContain("faits vérifiables");
+    expect(facts).not.toContain("inventée");
+  });
+
   it("extracts JSON from a fenced answer", () => {
     expect(extractJson('```json\n{"title":"A"}\n```')).toEqual({ title: "A" });
     expect(() => extractJson("pas de json")).toThrow(/no JSON/);
@@ -193,6 +202,7 @@ describe("script writer", () => {
     expect(script.title).toBe("Le viaduc");
     expect(script.niche).toBe("patrimoine");
     expect(script.language).toBe("fr");
+    expect(script.fiction).toBe(true);
     expect(JSON.parse(calls[0].body).model).toBe("gemini-3.8-flash");
   });
 });
@@ -368,5 +378,25 @@ describe("daily run", () => {
     expect(buildDescription({ title: "T", caption: "Le saviez-vous ?", hashtags: ["pont", "#France", "génie civil"] })).toBe(
       "Le saviez-vous ?\n\nContenu généré par IA : voix et images créées par intelligence artificielle.\n\n#pont #France #géniecivil #IA",
     );
+    expect(buildDescription({ title: "T", caption: "Elle a menti.", hashtags: [] }, true)).toContain(
+      "Histoire fictive : personnages et situations sont inventés. Contenu généré par IA",
+    );
+  });
+
+  it("posts dramas in Entertainment and true stories in Education", async () => {
+    const category = async (env: Record<string, string>) => {
+      const { impl, calls } = fakeFetch([
+        ["oauth2", () => json({ access_token: "t" })],
+        ["uploadType=resumable", () => new Response("", { status: 200, headers: { location: "https://upload.example/1" } })],
+        ["upload.example", () => json({ id: "v", status: { privacyStatus: "public" } })],
+      ]);
+      const [yt] = publishersFromEnv({ YOUTUBE_CLIENT_ID: "a", YOUTUBE_CLIENT_SECRET: "b", YOUTUBE_REFRESH_TOKEN: "c", ...env }, { fetchImpl: impl });
+      const file = path.join(tmp, "v.mp4");
+      fs.writeFileSync(file, "mp4");
+      await yt.publish({ videoPath: file, title: "T", description: "d", hashtags: [] });
+      return JSON.parse(calls[1].body).snippet.categoryId;
+    };
+    expect(await category({})).toBe("24");
+    expect(await category({ AUTOMATON_FORMAT: "vulgarisation" })).toBe("27");
   });
 });

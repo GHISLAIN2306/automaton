@@ -158,8 +158,20 @@ export class GeminiImage implements ImageProvider {
 }
 
 /** Prompt for one scene illustration: no text, so subtitles stay readable. */
-export function imagePrompt(title: string, scene: { visual?: string; onScreen?: string; narration: string }): string {
+export function imagePrompt(
+  title: string,
+  scene: { visual?: string; onScreen?: string; narration: string },
+  fiction = false,
+): string {
   const subject = scene.visual ?? `${scene.onScreen ? `${scene.onScreen}. ` : ""}${scene.narration}`;
+  if (fiction) {
+    return (
+      `Vertical 9:16 photorealistic cinematic still from a French drama short film titled "${title}". ` +
+      `Show exactly this: ${subject} ` +
+      "Fictional characters only, expressive faces, dramatic lighting, shallow depth of field, " +
+      "no text, no letters, no captions, no watermark."
+    );
+  }
   return (
     `Vertical 9:16 photorealistic image illustrating a short educational video titled "${title}". ` +
     `Show exactly this: ${subject} ` +

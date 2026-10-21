@@ -17,7 +17,7 @@
 import fs from "fs";
 import path from "path";
 import { createVideo, getVideosDir, listVideos, setVideoStatus } from "./review.js";
-import { DEFAULT_NICHE, writeScript, type WriteScriptOptions } from "./writer.js";
+import { DEFAULT_NICHES, formatFromEnv, writeScript, type WriteScriptOptions } from "./writer.js";
 import { InstagramPublisher } from "./publish/instagram.js";
 import { TikTokPublisher } from "./publish/tiktok.js";
 import { YouTubePublisher } from "./publish/youtube.js";
@@ -26,6 +26,7 @@ import type { Platform, PublicationRecord, VideoManifest, VideoScript } from "./
 
 const MAX_WRITE_ATTEMPTS = 3;
 const AI_NOTICE = "Contenu généré par IA : voix et images créées par intelligence artificielle.";
+const FICTION_NOTICE = "Histoire fictive : personnages et situations sont inventés.";
 
 export interface DailyOptions {
   env?: NodeJS.ProcessEnv;
@@ -56,6 +57,8 @@ export function publishersFromEnv(env: NodeJS.ProcessEnv = process.env, http: Ht
           clientSecret: env.YOUTUBE_CLIENT_SECRET,
           refreshToken: env.YOUTUBE_REFRESH_TOKEN,
           privacy: env.YOUTUBE_PRIVACY,
+          // Entertainment for the dramas, Education for true stories.
+          categoryId: env.YOUTUBE_CATEGORY_ID || (formatFromEnv(env) === "drama" ? "24" : "27"),
         },
         http,
       ),
@@ -85,9 +88,19 @@ export function publishersFromEnv(env: NodeJS.ProcessEnv = process.env, http: Ht
   return publishers;
 }
 
-export function buildDescription(video: Pick<VideoManifest, "title" | "caption" | "hashtags">): string {
+export function buildDescription(video: Pick<VideoManifest, "title" | "caption" | "hashtags">, fiction = false): string {
   const tags = (video.hashtags ?? []).map((t) => `#${t.replace(/^#/, "").replace(/\s+/g, "")}`);
-  return [video.caption || video.title, AI_NOTICE, [...tags, "#IA"].join(" ")].join("\n\n");
+  const notice = fiction ? `${FICTION_NOTICE} ${AI_NOTICE}` : AI_NOTICE;
+  return [video.caption || video.title, notice, [...tags, "#IA"].join(" ")].join("\n\n");
+}
+
+/** Whether the video's script is an invented story (read from its script.json). */
+function isFiction(dir: string, video: VideoManifest): boolean {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(dir, video.id, "script.json"), "utf-8")).fiction === true;
+  } catch {
+    return false;
+  }
 }
 
 function saveManifest(dir: string, manifest: VideoManifest): void {
@@ -110,7 +123,8 @@ async function makeTodaysVideo(options: DailyOptions, dir: string, env: NodeJS.P
       script = await writer({
         apiKey: env.GEMINI_API_KEY ?? "",
         model: env.AUTOMATON_SCRIPT_MODEL,
-        niche: env.AUTOMATON_NICHE || DEFAULT_NICHE,
+        format: formatFromEnv(env),
+        niche: env.AUTOMATON_NICHE || DEFAULT_NICHES[formatFromEnv(env)],
         topic: env.AUTOMATON_TOPIC,
         pastTitles,
         rejectedTitles,
@@ -213,7 +227,7 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
       const result = await publisher.publish({
         videoPath,
         title: video.title,
-        description: buildDescription(video),
+        description: buildDescription(video, isFiction(dir, video)),
         hashtags: video.hashtags ?? [],
       });
       publications[publisher.platform] = { status: result.status, at: new Date().toISOString(), id: result.id, url: result.url };
