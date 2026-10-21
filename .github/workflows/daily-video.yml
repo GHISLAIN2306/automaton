@@ -104,3 +104,18 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "Daily video $(date -u +%F)"
           git push
+
+      # Public page listing the DramaCPS series by number, for the bio link:
+      # https://<owner>.github.io/<repo>/suite/
+      - name: Update the bio link page
+        if: always()
+        run: |
+          [ -f content/clips/series.json ] || exit 0
+          git fetch --depth 1 origin gh-pages:gh-pages
+          git worktree add site gh-pages
+          node dist/video/series.js content/clips site/suite/index.html
+          cd site
+          git add suite
+          git diff --cached --quiet && exit 0
+          git commit -m "Page des séries $(date -u +%F)"
+          git push origin gh-pages

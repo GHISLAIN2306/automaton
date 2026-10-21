@@ -5,7 +5,9 @@
  * content/clips/a-publier/ (an .mp4, plus an optional .json with the same
  * name: {"series", "hook", "caption", "hashtags"}). Each clip is framed to
  * 1080x1920 with the hook written on screen for the first 3 seconds, and
- * posted with a "la suite : lien en bio" caption. These are not AI videos,
+ * posted with a "la suite : lien en bio" caption. With a "dramaUrl" in the
+ * .json, the series gets a number on the bio link page (series.ts) and the
+ * caption names it. These are not AI videos,
  * so they carry no AI label.
  *
  * Once taken, a clip moves to content/clips/en-cours/<video id>.mp4 so it can
@@ -18,6 +20,7 @@ import path from "path";
 import { promisify } from "util";
 import { ulid } from "ulid";
 import { filterPath, findFont, probeDuration, wrapText } from "./render.js";
+import { registerSeries } from "./series.js";
 import type { VideoCheck, VideoManifest } from "./types.js";
 
 const run = promisify(execFile);
@@ -36,6 +39,9 @@ export interface ClipInfo {
   hook?: string;
   caption?: string;
   hashtags?: string[];
+  /** DramaCPS "Drama URL" of the series, listed on the bio link page. */
+  dramaUrl?: string;
+  dramaId?: string;
 }
 
 export function getClipsDir(videosDir: string): string {
@@ -110,6 +116,8 @@ export async function prepareClip(clip: ClipInfo, options: PrepareClipOptions): 
 
   const hook = clip.hook || DEFAULT_CLIP_HOOK;
   const series = clip.series || path.basename(clip.file, path.extname(clip.file));
+  const number = clip.dramaUrl ? registerSeries(options.clipsDir, { title: series, url: clip.dramaUrl, dramaId: clip.dramaId }) : undefined;
+  const caption = clip.caption || (number ? `Tu veux savoir la suite ? 👀 Lien en bio, série n° ${number} 🎬` : DEFAULT_CLIP_CAPTION);
   const manifest: VideoManifest = {
     id,
     title: drawable(clip.hook || series).slice(0, 90),
@@ -122,7 +130,7 @@ export async function prepareClip(clip: ClipInfo, options: PrepareClipOptions): 
     aiLabel: "",
     voice: "original",
     checks: [],
-    caption: clip.caption || DEFAULT_CLIP_CAPTION,
+    caption,
     hashtags: clip.hashtags?.length ? clip.hashtags : DEFAULT_CLIP_HASHTAGS,
     source: "clip",
     clipFile: path.relative(options.clipsDir, pending),
