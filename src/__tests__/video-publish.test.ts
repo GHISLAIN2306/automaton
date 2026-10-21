@@ -334,6 +334,68 @@ describe("daily run", () => {
     expect(n).toBe(2);
   });
 
+  it("posts partner clips first, then one AI video, without the AI notice on clips", async () => {
+    const clipsDir = path.join(tmp, "clips");
+    const inbox = path.join(clipsDir, "a-publier");
+    fs.mkdirSync(inbox, { recursive: true });
+    fs.writeFileSync(path.join(inbox, "a-milliardaire.mp4"), "clip-a");
+    fs.writeFileSync(path.join(inbox, "a-milliardaire.json"), JSON.stringify({ series: "Le milliardaire caché", hook: "Elle ne savait pas que son mari était milliardaire…" }));
+    fs.writeFileSync(path.join(inbox, "b-mariage.mp4"), "clip-b");
+    const framed: string[] = [];
+    const frame = async (source: string, hook: string, out: string) => {
+      framed.push(`${fs.readFileSync(source, "utf-8")}|${hook}`);
+      fs.writeFileSync(out, "mp4");
+      return 58;
+    };
+    const yt = fakePublisher("youtube");
+    const env = { AUTOMATON_PUBLISH: "true", AUTOMATON_VIDEOS_PER_DAY: "3" };
+    const create = fakeCreate();
+    const run = () => runDaily({ env, now, dir, writer, create, publishers: [yt], clipsDir, frame });
+
+    const first = await run();
+    expect(first.video!.source).toBe("clip");
+    expect(framed[0]).toBe("clip-a|Elle ne savait pas que son mari était milliardaire…");
+    expect(yt.seen[0].title).toBe("Elle ne savait pas que son mari était milliardaire…");
+    expect(yt.seen[0].description).toContain("Lien en bio");
+    expect(yt.seen[0].description).not.toContain("IA");
+    // Posted everywhere: the source clip is gone.
+    expect(fs.readdirSync(path.join(clipsDir, "en-cours"))).toEqual([]);
+
+    const second = await run();
+    expect(second.video!.source).toBe("clip");
+    expect(framed[1]).toBe("clip-b|Regarde bien sa réaction à la fin");
+    const third = await run();
+    expect(third.video!.source).toBeUndefined();
+    expect(yt.seen[2].description).toContain("Contenu généré par IA");
+    const fourth = await run();
+    expect(fourth.created).toBe(false);
+    expect(yt.seen).toHaveLength(3);
+  });
+
+  it("frames a clip again on a fresh checkout and keeps it until posted everywhere", async () => {
+    const clipsDir = path.join(tmp, "clips");
+    fs.mkdirSync(path.join(clipsDir, "a-publier"), { recursive: true });
+    fs.writeFileSync(path.join(clipsDir, "a-publier", "x.mp4"), "clip-x");
+    let frames = 0;
+    const frame = async (_s: string, _h: string, out: string) => {
+      frames++;
+      fs.writeFileSync(out, "mp4");
+      return 40;
+    };
+    const env = { AUTOMATON_PUBLISH: "true", AUTOMATON_VIDEOS_PER_DAY: "3" };
+    const first = await runDaily({ env, now, dir, writer, create: fakeCreate(), publishers: [fakePublisher("youtube"), fakePublisher("tiktok", true)], clipsDir, frame });
+    const id = first.video!.id;
+    expect(fs.existsSync(path.join(clipsDir, "en-cours", `${id}.mp4`))).toBe(true);
+    fs.rmSync(path.join(dir, id, "video.mp4"));
+
+    const tt = fakePublisher("tiktok");
+    const second = await runDaily({ env, now, dir, writer, create: fakeCreate(), publishers: [fakePublisher("youtube"), tt], clipsDir, frame });
+    expect(second.video!.id).toBe(id);
+    expect(frames).toBe(2);
+    expect(tt.seen).toHaveLength(1);
+    expect(fs.existsSync(path.join(clipsDir, "en-cours", `${id}.mp4`))).toBe(false);
+  });
+
   it("does not post a video that fails its checks", async () => {
     const yt = fakePublisher("youtube");
     const report = await runDaily({ env: { AUTOMATON_PUBLISH: "true" }, now, dir, writer, create: fakeCreate(40), publishers: [yt] });

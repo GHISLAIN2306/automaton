@@ -1,15 +1,15 @@
 name: Vidéo quotidienne
 
-# Twice a day: write a new script, render the video, post it to YouTube,
-# TikTok and Instagram (AUTOMATON_VIDEOS_PER_DAY, default 2, caps the
-# number of videos per day). Scheduled runs only start once the repository
+# Up to 3 times a day: post a DramaCPS clip from content/clips/a-publier, or
+# write and render an AI mini-drama, to YouTube, TikTok and Instagram
+# (AUTOMATON_VIDEOS_PER_DAY, default 3, caps the number of videos per day). Scheduled runs only start once the repository
 # variable AUTOMATON_PUBLISH_ENABLED is "true" (Settings > Secrets and
 # variables > Actions > Variables); set it to "false" to stop the agent.
 on:
   schedule:
     # Abidjan time (UTC+0), the audience's peak hours: 12:00, 18:00 and 20:30.
-    # The 20:30 run only posts if AUTOMATON_VIDEOS_PER_DAY is 3, otherwise it
-    # just retries a platform that failed earlier in the day.
+    # Up to 3 videos a day: 2 partner clips (content/clips/a-publier) and 1 AI
+    # mini-drama, or 2 AI mini-dramas while no clip is waiting.
     - cron: "2 12 * * *"
     - cron: "2 18 * * *"
     - cron: "32 20 * * *"
@@ -48,7 +48,7 @@ jobs:
           AUTOMATON_VIDEOS_DIR: ${{ github.workspace }}/content/videos
           AUTOMATON_PUBLISH: ${{ (github.event_name == 'schedule' || inputs.publish) && 'true' || 'false' }}
           AUTOMATON_TOPIC: ${{ inputs.topic }}
-          AUTOMATON_VIDEOS_PER_DAY: ${{ vars.AUTOMATON_VIDEOS_PER_DAY || '2' }}
+          AUTOMATON_VIDEOS_PER_DAY: ${{ vars.AUTOMATON_VIDEOS_PER_DAY || '3' }}
           AUTOMATON_NICHE: ${{ vars.AUTOMATON_NICHE }}
           AUTOMATON_FORMAT: ${{ vars.AUTOMATON_FORMAT }}
           YOUTUBE_CATEGORY_ID: ${{ vars.YOUTUBE_CATEGORY_ID }}
@@ -95,12 +95,12 @@ jobs:
           done
           rm -f "$FILE"
 
-      - name: Save the history (scripts and results, not the videos)
+      - name: Save the history (scripts, results and clips still to post)
         if: always()
         run: |
           git config user.name "automaton-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add content/videos
+          git add -A content/videos content/clips
           git diff --cached --quiet && exit 0
           git commit -m "Daily video $(date -u +%F)"
           git push

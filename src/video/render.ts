@@ -92,11 +92,11 @@ export function timeSentences(sentences: string[], duration: number): Array<{ te
 }
 
 /** Escape a path for use inside an ffmpeg filter argument. */
-function filterPath(p: string): string {
+export function filterPath(p: string): string {
   return p.replace(/\\/g, "/").replace(/:/g, "\\:").replace(/'/g, "\\'");
 }
 
-async function probeDuration(file: string): Promise<number> {
+export async function probeDuration(file: string): Promise<number> {
   const { stdout } = await run("ffprobe", [
     "-v", "error",
     "-show_entries", "format=duration",
