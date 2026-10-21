@@ -307,6 +307,23 @@ describe("daily run", () => {
     expect(old.costCents).toBe(29);
   });
 
+  it("makes a second video the same day when AUTOMATON_VIDEOS_PER_DAY is 2, then stops", async () => {
+    const yt = fakePublisher("youtube");
+    const env = { AUTOMATON_PUBLISH: "true", AUTOMATON_VIDEOS_PER_DAY: "2" };
+    const create = fakeCreate();
+    let n = 0;
+    const numbered = async () => ({ ...(await writer()), title: `Sujet ${++n}` });
+    const first = await runDaily({ env, now, dir, writer: numbered, create, publishers: [yt] });
+    const second = await runDaily({ env, now, dir, writer: numbered, create, publishers: [yt] });
+    const third = await runDaily({ env, now, dir, writer: numbered, create, publishers: [yt] });
+    expect(first.video!.id).toBe("vid1");
+    expect(second.created).toBe(true);
+    expect(second.video!.id).toBe("vid2");
+    expect(third.created).toBe(false);
+    expect(yt.seen.map((r) => r.title)).toEqual(["Sujet 1", "Sujet 2"]);
+    expect(n).toBe(2);
+  });
+
   it("does not post a video that fails its checks", async () => {
     const yt = fakePublisher("youtube");
     const report = await runDaily({ env: { AUTOMATON_PUBLISH: "true" }, now, dir, writer, create: fakeCreate(40), publishers: [yt] });

@@ -1,19 +1,19 @@
 # Agent de publication quotidienne
 
-Chaque jour, le workflow GitHub Actions « Vidéo quotidienne » (`.github/workflows/daily-video.yml`) :
+Deux fois par jour, le workflow GitHub Actions « Vidéo quotidienne » (`.github/workflows/daily-video.yml`) :
 
 1. demande à Gemini un script sur un **nouveau sujet** de la niche (jamais un titre déjà traité, refus des quasi-doublons) ;
 2. fabrique la vidéo verticale : voix naturelle, une image par scène avec zoom lent, sous-titres, mention permanente « Contenu généré par IA » (environ 0,29 $) ;
 3. la publie sur **YouTube Shorts, TikTok et Instagram Reels** via les API officielles, en la déclarant comme contenu IA (`containsSyntheticMedia` sur YouTube, `is_aigc` sur TikTok, mention dans la légende sur Instagram) ;
 4. enregistre le script et les liens dans `content/videos/` et garde la vidéo 30 jours dans les artefacts du workflow.
 
-Les plafonds de dépense restent actifs : 0,50 $ par vidéo et 30 $ par mois. Une vidéo de moins de 61 secondes n'est pas publiée.
+Les plafonds de dépense restent actifs : 0,50 $ par vidéo et 30 $ par mois (2 vidéos par jour coûtent environ 18 $ par mois). Une vidéo de moins de 61 secondes n'est pas publiée.
 
 ## Démarrer, arrêter
 
 - **Essai sans publier** : onglet Actions → « Vidéo quotidienne » → « Run workflow », case « Publier » décochée. La vidéo est téléchargeable dans les artefacts du run.
 - **Publier une fois à la main** : même chose avec « Publier » cochée.
-- **Publication automatique tous les jours** (vers 18 h 17 à Paris) : Settings → Secrets and variables → Actions → onglet Variables → `AUTOMATON_PUBLISH_ENABLED` = `true`.
+- **Publication automatique** : 2 vidéos par jour, vers 12 h 17 et 18 h 17 à Paris (heure d'été). Activation : Settings → Secrets and variables → Actions → onglet Variables → `AUTOMATON_PUBLISH_ENABLED` = `true`.
 - **Arrêter** : mettre cette variable à `false`.
 
 Sur un fork, il faut aussi activer les workflows une fois dans l'onglet Actions.
@@ -33,7 +33,7 @@ Une plateforme dont les secrets manquent est simplement ignorée.
 | `INSTAGRAM_USER_ID` | facultatif, retrouvé automatiquement sinon |
 | `SECRETS_ADMIN_TOKEN` | facultatif mais conseillé : jeton GitHub « fine-grained » limité à ce dépôt, droit « Secrets : Read and write ». Il permet d'enregistrer les jetons TikTok et Instagram renouvelés. |
 
-Variables facultatives : `AUTOMATON_NICHE` (description de la niche), `YOUTUBE_PRIVACY` (`public` par défaut), `TIKTOK_PRIVACY` (`PUBLIC_TO_EVERYONE` par défaut).
+Variables facultatives : `AUTOMATON_VIDEOS_PER_DAY` (nombre maximal de vidéos par jour, `2` par défaut ; mettre `1` pour une seule), `AUTOMATON_NICHE` (description de la niche), `YOUTUBE_PRIVACY` (`public` par défaut), `TIKTOK_PRIVACY` (`PUBLIC_TO_EVERYONE` par défaut).
 
 ## Limites imposées par les plateformes
 
