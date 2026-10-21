@@ -194,7 +194,10 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
   const clipOptions: PrepareClipOptions = { dir, clipsDir, frame: options.frame, download: options.download };
   const publishers = options.publishers ?? publishersFromEnv(env);
   const todays = listVideos(dir).filter((v) => !v.renderFailed && v.status !== "rejected" && v.createdAt.startsWith(today));
-  const unfinished = (v: VideoManifest) => publishers.some((p) => (v.publications?.[p.platform]?.status ?? "failed") === "failed");
+  // A platform added after a video went out does not get that video: only
+  // failed posts, or a video posted nowhere yet, are retried.
+  const unfinished = (v: VideoManifest) =>
+    !v.publications || publishers.some((p) => v.publications?.[p.platform]?.status === "failed");
   const clipsToday = todays.filter((v) => v.source === "clip").length;
   const aiToday = todays.length - clipsToday;
   const inbox = listInbox(clipsDir);
@@ -203,6 +206,15 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
 
   let video = todays.find(unfinished);
   let kind: "clip" | "ai" | undefined;
+  // A late scheduled run right after a manual one must not post twice in a row.
+  const minGap = intFromEnv(env.AUTOMATON_MIN_GAP_MINUTES, 0);
+  const last = todays[todays.length - 1];
+  const tooSoon = !!last && now.getTime() - Date.parse(last.createdAt) < minGap * 60_000;
+  if (!video && tooSoon) {
+    log(`Last video ${last.id} is less than ${minGap} min old: waiting for the next slot.`);
+    report.video = last;
+    return report;
+  }
   if (!video && todays.length < perDay) {
     // Partner clips first (they earn commissions), then AI videos: fewer of
     // them once clips are coming in, so the clips keep most of the slots.

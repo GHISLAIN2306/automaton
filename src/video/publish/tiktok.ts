@@ -105,13 +105,13 @@ export class TikTokPublisher implements Publisher {
     const size = fs.statSync(req.videoPath).size;
     if (size > MAX_SINGLE_CHUNK) throw new Error(`Video is ${Math.round(size / 1e6)} MB, over the 64 MB single-upload limit`);
 
-    const init = await this.call<{ publish_id: string; upload_url: string }>(
+    const start = (privacy_level: string) => this.call<{ publish_id: string; upload_url: string }>(
       token,
       "/post/publish/video/init/",
       {
         post_info: {
           title: req.description.slice(0, 2200),
-          privacy_level: privacy,
+          privacy_level,
           disable_comment: false,
           disable_duet: false,
           disable_stitch: false,
@@ -123,6 +123,14 @@ export class TikTokPublisher implements Publisher {
       },
       "TikTok post start",
     );
+    // An app not yet audited may list PUBLIC_TO_EVERYONE but gets a 403 for it:
+    // post privately instead.
+    let posted = privacy;
+    const init = await start(privacy).catch((err: Error) => {
+      if (privacy === "SELF_ONLY" || !options.includes("SELF_ONLY") || !/HTTP 403/.test(err.message)) throw err;
+      posted = "SELF_ONLY";
+      return start(posted);
+    });
 
     const upload = await this.fetch(init.upload_url, {
       method: "PUT",
@@ -147,7 +155,7 @@ export class TikTokPublisher implements Publisher {
         const postId = status.publicaly_available_post_id?.[0];
         return {
           platform: "tiktok",
-          status: privacy === "SELF_ONLY" ? "private" : "published",
+          status: posted === "SELF_ONLY" ? "private" : "published",
           id: postId ? String(postId) : init.publish_id,
         };
       }

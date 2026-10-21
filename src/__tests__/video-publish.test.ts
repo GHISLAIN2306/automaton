@@ -118,6 +118,20 @@ describe("TikTok publisher", () => {
     expect(result.status).toBe("private");
   });
 
+  it("posts privately when TikTok refuses a public post from an app not yet audited", async () => {
+    const { impl, calls } = routes(["PUBLIC_TO_EVERYONE", "SELF_ONLY"], ["PUBLISH_COMPLETE"]);
+    let inits = 0;
+    const refusing: typeof fetch = (async (url: any, init?: any) => {
+      if (String(url).includes("/video/init/") && inits++ === 0) {
+        return json({ error: { code: "unaudited_client_can_only_post_to_private_accounts", message: "Please review our integration guidelines" } }, 403);
+      }
+      return impl(url, init);
+    }) as any;
+    const result = await new TikTokPublisher({ clientKey: "k", clientSecret: "s", refreshToken: "r" }, { fetchImpl: refusing, sleep: async () => {} }).publish(req);
+    expect(result.status).toBe("private");
+    expect(JSON.parse(calls.find((c) => c.url.includes("/video/init/"))!.body).post_info.privacy_level).toBe("SELF_ONLY");
+  });
+
   it("fails when TikTok rejects the post", async () => {
     const { impl } = routes(["PUBLIC_TO_EVERYONE"], ["FAILED"]);
     await expect(
@@ -290,6 +304,33 @@ describe("daily run", () => {
     expect(second.failures).toEqual([]);
     const saved = JSON.parse(fs.readFileSync(path.join(dir, "vid1", "manifest.json"), "utf-8"));
     expect(saved.publications.tiktok.status).toBe("published");
+  });
+
+  it("does not post an earlier video to a platform connected later", async () => {
+    const yt = fakePublisher("youtube");
+    const env = { AUTOMATON_PUBLISH: "true", AUTOMATON_VIDEOS_PER_DAY: "1" };
+    const create = fakeCreate();
+    await runDaily({ env, now, dir, writer, create, publishers: [yt] });
+    const tt = fakePublisher("tiktok");
+    const second = await runDaily({ env, now, dir, writer, create, publishers: [yt, tt] });
+    expect(second.created).toBe(false);
+    expect(tt.seen).toHaveLength(0);
+  });
+
+  it("waits for the next slot when the last video is too recent", async () => {
+    const yt = fakePublisher("youtube");
+    const env = { AUTOMATON_PUBLISH: "true", AUTOMATON_VIDEOS_PER_DAY: "3", AUTOMATON_MIN_GAP_MINUTES: "90" };
+    const create = fakeCreate();
+    const first = await runDaily({ env, now, dir, writer, create, publishers: [yt] });
+    const soon = new Date(Date.parse(first.video!.createdAt) + 30 * 60_000);
+    const second = await runDaily({ env, now: soon, dir, writer, create, publishers: [yt] });
+    expect(second.created).toBe(false);
+    expect(yt.seen).toHaveLength(1);
+    const later = new Date(Date.parse(first.video!.createdAt) + 120 * 60_000);
+    if (later.toISOString().slice(0, 10) === now.toISOString().slice(0, 10)) {
+      const third = await runDaily({ env, now: later, dir, writer, create, publishers: [yt] });
+      expect(third.created).toBe(true);
+    }
   });
 
   it("renders today's script again when the video file is gone (fresh CI checkout)", async () => {
