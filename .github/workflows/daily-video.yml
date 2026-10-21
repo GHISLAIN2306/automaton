@@ -46,6 +46,8 @@ jobs:
           AUTOMATON_TOPIC: ${{ inputs.topic }}
           AUTOMATON_VIDEOS_PER_DAY: ${{ vars.AUTOMATON_VIDEOS_PER_DAY || '2' }}
           AUTOMATON_NICHE: ${{ vars.AUTOMATON_NICHE }}
+          AUTOMATON_FORMAT: ${{ vars.AUTOMATON_FORMAT }}
+          YOUTUBE_CATEGORY_ID: ${{ vars.YOUTUBE_CATEGORY_ID }}
           AUTOMATON_RENEWED_SECRETS_FILE: ${{ runner.temp }}/renewed-secrets.json
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}

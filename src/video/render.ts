@@ -139,7 +139,7 @@ export async function renderVideo(
     let background: string[];
     let backgroundFilters: string[];
     if (images) {
-      const image = await images.generate(imagePrompt(script.title, scene), path.join(workDir, `image-${i}`));
+      const image = await images.generate(imagePrompt(script.title, scene, script.fiction), path.join(workDir, `image-${i}`));
       costCents += images.costCents();
       const frames = Math.ceil(duration * fps);
       // Slow Ken Burns zoom, then darken the lower part so subtitles stay readable.

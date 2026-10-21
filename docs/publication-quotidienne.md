@@ -2,7 +2,7 @@
 
 Deux fois par jour, le workflow GitHub Actions « Vidéo quotidienne » (`.github/workflows/daily-video.yml`) :
 
-1. demande à Gemini un script sur un **nouveau sujet** de la niche (jamais un titre déjà traité, refus des quasi-doublons) ;
+1. demande à Gemini un script **nouveau** : par défaut un mini-drame original (histoire fictive avec rebondissement, signalée comme telle), ou une histoire vraie de vulgarisation avec `AUTOMATON_FORMAT` = `vulgarisation` (jamais un titre déjà traité, refus des quasi-doublons) ;
 2. fabrique la vidéo verticale : voix naturelle, une image par scène avec zoom lent, sous-titres, mention permanente « Contenu généré par IA » (environ 0,29 $) ;
 3. la publie sur **YouTube Shorts, TikTok et Instagram Reels** via les API officielles, en la déclarant comme contenu IA (`containsSyntheticMedia` sur YouTube, `is_aigc` sur TikTok, mention dans la légende sur Instagram) ;
 4. enregistre le script et les liens dans `content/videos/` et garde la vidéo 30 jours dans les artefacts du workflow.
@@ -33,7 +33,7 @@ Une plateforme dont les secrets manquent est simplement ignorée.
 | `INSTAGRAM_USER_ID` | facultatif, retrouvé automatiquement sinon |
 | `SECRETS_ADMIN_TOKEN` | facultatif mais conseillé : jeton GitHub « fine-grained » limité à ce dépôt, droit « Secrets : Read and write ». Il permet d'enregistrer les jetons TikTok et Instagram renouvelés. |
 
-Variables facultatives : `AUTOMATON_VIDEOS_PER_DAY` (nombre maximal de vidéos par jour, `2` par défaut ; mettre `1` pour une seule), `AUTOMATON_NICHE` (description de la niche), `YOUTUBE_PRIVACY` (`public` par défaut), `TIKTOK_PRIVACY` (`PUBLIC_TO_EVERYONE` par défaut).
+Variables facultatives : `AUTOMATON_FORMAT` (`drama` par défaut, ou `vulgarisation`), `AUTOMATON_VIDEOS_PER_DAY` (nombre maximal de vidéos par jour, `2` par défaut ; mettre `1` pour une seule), `AUTOMATON_NICHE` (description de la niche), `YOUTUBE_PRIVACY` (`public` par défaut), `TIKTOK_PRIVACY` (`PUBLIC_TO_EVERYONE` par défaut).
 
 ## Limites imposées par les plateformes
 
