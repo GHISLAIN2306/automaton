@@ -13,7 +13,7 @@ Les plafonds de dépense restent actifs : 0,50 $ par vidéo et 30 $ par mois (2 
 
 - **Essai sans publier** : onglet Actions → « Vidéo quotidienne » → « Run workflow », case « Publier » décochée. La vidéo est téléchargeable dans les artefacts du run.
 - **Publier une fois à la main** : même chose avec « Publier » cochée.
-- **Publication automatique** : 2 vidéos par jour, vers 12 h 17 et 18 h 17 à Paris (heure d'été). Activation : Settings → Secrets and variables → Actions → onglet Variables → `AUTOMATON_PUBLISH_ENABLED` = `true`.
+- **Publication automatique** : 2 vidéos par jour, vers 12 h et 18 h heure d'Abidjan (un 3e créneau à 20 h 30 sert si `AUTOMATON_VIDEOS_PER_DAY` = `3`). Activation : Settings → Secrets and variables → Actions → onglet Variables → `AUTOMATON_PUBLISH_ENABLED` = `true`.
 - **Arrêter** : mettre cette variable à `false`.
 
 Sur un fork, il faut aussi activer les workflows une fois dans l'onglet Actions.
