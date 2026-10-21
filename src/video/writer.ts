@@ -22,8 +22,9 @@ export type ScriptFormat = "drama" | "vulgarisation";
 
 export const DEFAULT_NICHES: Record<ScriptFormat, string> = {
   drama:
-    "Mini-drames originaux en français : secrets de famille, trahisons, amours contrariées, revanches " +
-    "et retournements de situation dans la vie de tous les jours",
+    "Mini-drames originaux en français, dans l'esprit des mini-séries à succès : milliardaire caché, " +
+    "humiliation suivie d'une revanche, belle-famille cruelle, mariage arrangé ou sous contrat, trahison, " +
+    "secret de famille, retour triomphal des années plus tard",
   vulgarisation:
     "Vulgarisation en français : sciences, nature, animaux, patrimoine et prouesses d'ingénierie, " +
     "racontés comme une petite histoire surprenante et rigoureusement exacte",
@@ -50,7 +51,7 @@ const FORMAT_RULES: Record<ScriptFormat, string[]> = {
   drama: [
     "- Histoire entièrement inventée : personnages fictifs aux prénoms courants, jamais de personne réelle ou célèbre, aucune marque.",
     "- Convenable pour tous : pas de violence montrée, pas de sexe, pas de haine, aucun enfant en danger.",
-    "- Accroche : la toute première phrase (moins de 3 secondes, 15 mots maximum) jette directement dans le conflit, par exemple « Le jour de son mariage, Clara a trouvé une lettre qui a tout changé. » Jamais de présentation.",
+    "- Accroche : la toute première phrase (moins de 3 secondes, 15 mots maximum) jette directement dans le conflit, par exemple « Ils l'ont humiliée au mariage. Grosse erreur. » ou « Le serveur qu'ils ont insulté… était le patron. » Jamais de présentation.",
     "- Narration au présent, phrases courtes, tension qui monte à chaque scène, un retournement inattendu mais logique vers la fin, aucun remplissage.",
     "- Dernière scène : la chute, puis une question courte qui fait réagir en commentaire (« Et vous, vous auriez pardonné ? »), puis « Abonne-toi pour une nouvelle histoire chaque jour. »",
     "- 2 ou 3 personnages au maximum. Dans chaque visual, décris chaque personnage présent avec exactement la même apparence (âge, cheveux, vêtements) pour qu'on le reconnaisse d'une image à l'autre.",
