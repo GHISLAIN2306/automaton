@@ -17,6 +17,7 @@
 import fs from "fs";
 import path from "path";
 import { createVideo, getVideosDir, listVideos, setVideoStatus } from "./review.js";
+import { frameManifest, getClipsDir, listInbox, prepareClip, releaseClip, type PrepareClipOptions } from "./clips.js";
 import { DEFAULT_NICHES, formatFromEnv, writeScript, type WriteScriptOptions } from "./writer.js";
 import { InstagramPublisher } from "./publish/instagram.js";
 import { TikTokPublisher } from "./publish/tiktok.js";
@@ -36,6 +37,9 @@ export interface DailyOptions {
   create?: typeof createVideo;
   publishers?: Publisher[];
   log?: (message: string) => void;
+  clipsDir?: string;
+  /** Frames partner clips; replaced in tests. */
+  frame?: PrepareClipOptions["frame"];
 }
 
 export interface DailyReport {
@@ -88,8 +92,10 @@ export function publishersFromEnv(env: NodeJS.ProcessEnv = process.env, http: Ht
   return publishers;
 }
 
-export function buildDescription(video: Pick<VideoManifest, "title" | "caption" | "hashtags">, fiction = false): string {
+export function buildDescription(video: Pick<VideoManifest, "title" | "caption" | "hashtags" | "source">, fiction = false): string {
   const tags = (video.hashtags ?? []).map((t) => `#${t.replace(/^#/, "").replace(/\s+/g, "")}`);
+  // Partner clips are real footage: no AI notice.
+  if (video.source === "clip") return [video.caption || video.title, tags.join(" ")].filter(Boolean).join("\n\n");
   const notice = fiction ? `${FICTION_NOTICE} ${AI_NOTICE}` : AI_NOTICE;
   return [video.caption || video.title, notice, [...tags, "#IA"].join(" ")].join("\n\n");
 }
@@ -175,24 +181,43 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
   const report: DailyReport = { created: false, publishing, failures: [], renewedSecrets: {} };
 
   const perDay = Math.max(1, Number.parseInt(env.AUTOMATON_VIDEOS_PER_DAY ?? "", 10) || 1);
+  const clipsPerDay = intFromEnv(env.AUTOMATON_CLIPS_PER_DAY, 2);
+  const aiOnlyPerDay = intFromEnv(env.AUTOMATON_AI_ONLY_PER_DAY, 2);
+  const clipsDir = options.clipsDir ?? getClipsDir(dir);
+  const clipOptions: PrepareClipOptions = { dir, clipsDir, frame: options.frame };
   const publishers = options.publishers ?? publishersFromEnv(env);
   const todays = listVideos(dir).filter((v) => !v.renderFailed && v.status !== "rejected" && v.createdAt.startsWith(today));
   const unfinished = (v: VideoManifest) => publishers.some((p) => (v.publications?.[p.platform]?.status ?? "failed") === "failed");
+  const clipsToday = todays.filter((v) => v.source === "clip").length;
+  const aiToday = todays.length - clipsToday;
+  const inbox = listInbox(clipsDir);
 
   let video = todays.find(unfinished);
-  if (!video && todays.length >= perDay) {
-    log(`Today's ${todays.length} video(s) already posted (limit ${perDay} per day).`);
+  let kind: "clip" | "ai" | undefined;
+  if (!video && todays.length < perDay) {
+    // Partner clips first (they earn commissions), then AI videos: fewer of
+    // them once clips are coming in, so the clips keep most of the slots.
+    const aiLimit = clipsToday + inbox.length > 0 ? perDay - clipsPerDay : aiOnlyPerDay;
+    if (inbox.length && clipsToday < clipsPerDay) kind = "clip";
+    else if (aiToday < aiLimit) kind = "ai";
+  }
+  if (!video && !kind) {
+    log(`Today's ${todays.length} video(s) already posted (limit ${perDay} per day, ${clipsToday} clip(s)).`);
     report.video = todays[todays.length - 1];
     return report;
   }
   if (video && !fs.existsSync(path.join(dir, video.id, "video.mp4"))) {
-    // Only scripts and manifests are kept between runs (the MP4 is not committed):
-    // render that script again rather than writing a new one.
-    video = await rerender(video, options, dir, env);
+    // Only scripts, manifests and clip sources are kept between runs (the MP4
+    // is not committed): make the same video again rather than a new one.
+    video = video.source === "clip" ? await frameManifest(video, clipOptions) : await rerender(video, options, dir, env);
     report.created = true;
     log(`Rendered ${video.title} again as ${video.id}: ${video.durationSec}s`);
   } else if (video) {
     log(`Reusing today's video ${video.id}: "${video.title}"`);
+  } else if (kind === "clip") {
+    video = await prepareClip(inbox[0], clipOptions);
+    report.created = true;
+    log(`Framed partner clip ${video.id} (${video.niche}): ${video.durationSec}s, ${inbox.length - 1} left in the inbox`);
   } else {
     video = await makeTodaysVideo(options, dir, env);
     report.created = true;
@@ -243,8 +268,14 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
   }
   video = { ...video, publications };
   saveManifest(dir, video);
+  if (video.source === "clip" && !unfinished(video)) releaseClip(video, clipsDir);
   report.video = video;
   return report;
+}
+
+function intFromEnv(value: string | undefined, fallback: number): number {
+  const n = Number.parseInt(value ?? "", 10);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
 }
 
 function summary(report: DailyReport): string {

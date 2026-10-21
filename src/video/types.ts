@@ -58,6 +58,12 @@ export interface VideoManifest {
   checks: VideoCheck[];
   caption?: string;
   hashtags?: string[];
+  /** "clip" for a licensed partner extract (no AI); absent for AI videos. */
+  source?: "clip";
+  /** Partner clip source, relative to the clips directory. */
+  clipFile?: string;
+  /** Text shown on screen during the first seconds of a partner clip. */
+  hook?: string;
   /** Where the video was posted, filled by the daily publisher. */
   publications?: Partial<Record<Platform, PublicationRecord>>;
 }

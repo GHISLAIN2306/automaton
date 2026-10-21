@@ -9,11 +9,15 @@ Deux fois par jour, le workflow GitHub Actions « Vidéo quotidienne » (`.githu
 
 Les plafonds de dépense restent actifs : 0,50 $ par vidéo et 30 $ par mois (2 vidéos par jour coûtent environ 18 $ par mois). Une vidéo de moins de 61 secondes n'est pas publiée.
 
+## Extraits DramaCPS
+
+Les extraits de mini-séries fournis par DramaCPS se déposent dans `content/clips/a-publier/` (mode d'emploi dans le fichier LISEZ-MOI de ce dossier). L'agent en publie jusqu'à 2 par jour, avec l'accroche à l'écran pendant 3 secondes et la légende « Tu veux savoir la suite ? 👀 Lien en bio 🎬 », sans mention IA puisque ce ne sont pas des vidéos IA. Le 3e créneau sert à un mini-drame IA. Sans extrait en attente, l'agent publie 2 mini-drames IA par jour. Variables : `AUTOMATON_CLIPS_PER_DAY` (2), `AUTOMATON_AI_ONLY_PER_DAY` (2).
+
 ## Démarrer, arrêter
 
 - **Essai sans publier** : onglet Actions → « Vidéo quotidienne » → « Run workflow », case « Publier » décochée. La vidéo est téléchargeable dans les artefacts du run.
 - **Publier une fois à la main** : même chose avec « Publier » cochée.
-- **Publication automatique** : 2 vidéos par jour, vers 12 h et 18 h heure d'Abidjan (un 3e créneau à 20 h 30 sert si `AUTOMATON_VIDEOS_PER_DAY` = `3`). Activation : Settings → Secrets and variables → Actions → onglet Variables → `AUTOMATON_PUBLISH_ENABLED` = `true`.
+- **Publication automatique** : jusqu'à 3 vidéos par jour, vers 12 h, 18 h et 20 h 30 heure d'Abidjan. Activation : Settings → Secrets and variables → Actions → onglet Variables → `AUTOMATON_PUBLISH_ENABLED` = `true`.
 - **Arrêter** : mettre cette variable à `false`.
 
 Sur un fork, il faut aussi activer les workflows une fois dans l'onglet Actions.
