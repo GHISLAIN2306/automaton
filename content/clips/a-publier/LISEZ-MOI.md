@@ -12,8 +12,12 @@ Pour choisir l'accroche affichée pendant les 3 premières secondes, ajoutez un 
   "series": "Le milliardaire caché",
   "hook": "Elle ne savait pas que son mari était milliardaire…",
   "caption": "Tu veux savoir la suite ? 👀 Lien en bio 🎬",
-  "hashtags": ["minisérie", "drama", "milliardaire", "dramaexpress"]
+  "hashtags": ["minisérie", "drama", "milliardaire", "dramaexpress"],
+  "dramaId": "660219",
+  "dramaUrl": "le Drama URL copié dans l'onglet Links de DramaCPS"
 }
 ```
+
+Avec `dramaUrl`, la série reçoit un numéro sur la page du lien en bio (https://ghislain2306.github.io/automaton/suite/) et la légende devient « Lien en bio, série n° 3 ». Plusieurs extraits d'une même série gardent le même numéro.
 
 Tous les champs sont facultatifs. Sans accroche, l'agent affiche « Regarde bien sa réaction à la fin ». Une fois l'extrait publié partout, il est supprimé d'ici.

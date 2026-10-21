@@ -3,6 +3,7 @@ import os from "os";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildDescription, publishersFromEnv, runDaily } from "../video/daily.js";
+import { loadSeries, renderSeriesPage } from "../video/series.js";
 import { InstagramPublisher } from "../video/publish/instagram.js";
 import { TikTokPublisher } from "../video/publish/tiktok.js";
 import { YouTubePublisher } from "../video/publish/youtube.js";
@@ -370,6 +371,28 @@ describe("daily run", () => {
     const fourth = await run();
     expect(fourth.created).toBe(false);
     expect(yt.seen).toHaveLength(3);
+  });
+
+  it("numbers each series on the bio link page and names the number in the caption", async () => {
+    const clipsDir = path.join(tmp, "clips");
+    const inbox = path.join(clipsDir, "a-publier");
+    fs.mkdirSync(inbox, { recursive: true });
+    for (const [name, url] of [["a", "https://d.example/1"], ["b", "https://d.example/2"], ["c", "https://d.example/1"]]) {
+      fs.writeFileSync(path.join(inbox, `${name}.mp4`), name);
+      fs.writeFileSync(path.join(inbox, `${name}.json`), JSON.stringify({ series: `Série ${url.slice(-1)}`, dramaUrl: url }));
+    }
+    const frame = async (_s: string, _h: string, out: string) => (fs.writeFileSync(out, "mp4"), 30);
+    const yt = fakePublisher("youtube");
+    const env = { AUTOMATON_PUBLISH: "true", AUTOMATON_VIDEOS_PER_DAY: "3", AUTOMATON_CLIPS_PER_DAY: "3" };
+    for (let i = 0; i < 3; i++) await runDaily({ env, now, dir, writer, create: fakeCreate(), publishers: [yt], clipsDir, frame });
+    expect(yt.seen.map((r) => r.description.split("\n")[0])).toEqual([
+      "Tu veux savoir la suite ? 👀 Lien en bio, série n° 1 🎬",
+      "Tu veux savoir la suite ? 👀 Lien en bio, série n° 2 🎬",
+      "Tu veux savoir la suite ? 👀 Lien en bio, série n° 1 🎬",
+    ]);
+    const page = renderSeriesPage(loadSeries(clipsDir));
+    expect(page.indexOf("n° 2")).toBeLessThan(page.indexOf("n° 1"));
+    expect(page).toContain('href="https://d.example/2"');
   });
 
   it("frames a clip again on a fresh checkout and keeps it until posted everywhere", async () => {
