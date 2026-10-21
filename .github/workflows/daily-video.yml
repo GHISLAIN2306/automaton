@@ -7,8 +7,12 @@ name: Vidéo quotidienne
 # variables > Actions > Variables); set it to "false" to stop the agent.
 on:
   schedule:
-    - cron: "17 10 * * *" # 12:17 in Paris in summer, 11:17 in winter
-    - cron: "17 16 * * *" # 18:17 in Paris in summer, 17:17 in winter
+    # Abidjan time (UTC+0), the audience's peak hours: 12:00, 18:00 and 20:30.
+    # The 20:30 run only posts if AUTOMATON_VIDEOS_PER_DAY is 3, otherwise it
+    # just retries a platform that failed earlier in the day.
+    - cron: "2 12 * * *"
+    - cron: "2 18 * * *"
+    - cron: "32 20 * * *"
   workflow_dispatch:
     inputs:
       publish:
