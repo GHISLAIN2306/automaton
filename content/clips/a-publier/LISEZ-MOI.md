@@ -1,5 +1,9 @@
 # Extraits DramaCPS à publier
 
+**Le plus simple : la liste des séries.** Dans `content/clips/series-a-publier.json`, chaque série DramaCPS tient en une ligne : son numéro (Drama ID), son titre, le lien « Get Link » (`dramaUrl`), le lien « Get Video → Copy Link » (`pack`), une accroche, et le nombre d'épisodes à publier (5 par défaut). L'agent télécharge lui-même l'épisode suivant et alterne entre les séries. Pas besoin de déposer de vidéo.
+
+Vous pouvez aussi déposer vos propres extraits à la main dans ce dossier, comme ci-dessous ; ils passent en premier.
+
 Déposez ici les extraits fournis par DramaCPS (fichiers `.mp4`, 25 Mo maximum par fichier quand on passe par le site GitHub) :
 **Add file → Upload files**, puis « Commit changes ».
 
