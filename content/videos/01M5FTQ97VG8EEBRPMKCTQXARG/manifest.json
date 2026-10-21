@@ -40,8 +40,8 @@
     },
     "tiktok": {
       "status": "failed",
-      "at": "2026-10-21T18:23:15.393Z",
-      "error": "Video is 75 MB, over the 64 MB single-upload limit"
+      "at": "2026-10-21T18:26:01.300Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/"
     }
   }
 }
