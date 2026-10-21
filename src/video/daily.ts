@@ -209,7 +209,7 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
   // A late scheduled run right after a manual one must not post twice in a row.
   const minGap = intFromEnv(env.AUTOMATON_MIN_GAP_MINUTES, 0);
   const last = todays[todays.length - 1];
-  const tooSoon = !!last && now.getTime() - Date.parse(last.createdAt) < minGap * 60_000;
+  const tooSoon = minGap > 0 && !!last && now.getTime() - Date.parse(last.createdAt) < minGap * 60_000;
   if (!video && tooSoon) {
     log(`Last video ${last.id} is less than ${minGap} min old: waiting for the next slot.`);
     report.video = last;

@@ -29,8 +29,11 @@ export interface TikTokCredentials {
 }
 
 const API = "https://open.tiktokapis.com/v2";
-/** TikTok accepts a single chunk up to 64 MB. */
+/** TikTok accepts a single chunk up to 64 MB; bigger files go in chunks of 5 to 64 MB. */
 const MAX_SINGLE_CHUNK = 64 * 1024 * 1024;
+const CHUNK = 10 * 1024 * 1024;
+/** The last chunk takes the remainder and may reach 128 MB; TikTok allows up to 1000 chunks. */
+const MAX_VIDEO = 1000 * CHUNK;
 
 interface TikTokEnvelope<T> {
   data?: T;
@@ -103,7 +106,9 @@ export class TikTokPublisher implements Publisher {
     if (!privacy) throw new Error(`TikTok refuses privacy ${wanted} (allowed: ${options.join(", ") || "none"})`);
 
     const size = fs.statSync(req.videoPath).size;
-    if (size > MAX_SINGLE_CHUNK) throw new Error(`Video is ${Math.round(size / 1e6)} MB, over the 64 MB single-upload limit`);
+    if (size > MAX_VIDEO) throw new Error(`Video is ${Math.round(size / 1e6)} MB, too big for TikTok`);
+    const chunkSize = size > MAX_SINGLE_CHUNK ? CHUNK : size;
+    const chunks = Math.max(1, Math.floor(size / chunkSize));
 
     const start = (privacy_level: string) => this.call<{ publish_id: string; upload_url: string }>(
       token,
@@ -119,7 +124,7 @@ export class TikTokPublisher implements Publisher {
           brand_content_toggle: false,
           brand_organic_toggle: false,
         },
-        source_info: { source: "FILE_UPLOAD", video_size: size, chunk_size: size, total_chunk_count: 1 },
+        source_info: { source: "FILE_UPLOAD", video_size: size, chunk_size: chunkSize, total_chunk_count: chunks },
       },
       "TikTok post start",
     );
@@ -132,16 +137,21 @@ export class TikTokPublisher implements Publisher {
       return start(posted);
     });
 
-    const upload = await this.fetch(init.upload_url, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "video/mp4",
-        "Content-Length": String(size),
-        "Content-Range": `bytes 0-${size - 1}/${size}`,
-      },
-      body: fs.readFileSync(req.videoPath),
-    });
-    if (!upload.ok) throw new Error(`TikTok upload: HTTP ${upload.status}: ${(await upload.text()).slice(0, 300)}`);
+    const file = fs.readFileSync(req.videoPath);
+    for (let i = 0; i < chunks; i++) {
+      const from = i * chunkSize;
+      const to = i === chunks - 1 ? size - 1 : from + chunkSize - 1;
+      const upload = await this.fetch(init.upload_url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "video/mp4",
+          "Content-Length": String(to - from + 1),
+          "Content-Range": `bytes ${from}-${to}/${size}`,
+        },
+        body: file.subarray(from, to + 1),
+      });
+      if (!upload.ok) throw new Error(`TikTok upload (part ${i + 1}/${chunks}): HTTP ${upload.status}: ${(await upload.text()).slice(0, 300)}`);
+    }
 
     const sleep = this.http.sleep ?? defaultSleep;
     for (let attempt = 0; attempt < 40; attempt++) {
