@@ -335,6 +335,19 @@ describe("daily run", () => {
     expect(tt.seen).toHaveLength(0);
   });
 
+  it("stops retrying a platform after 3 failed attempts and moves on to the next video", async () => {
+    const yt = fakePublisher("youtube");
+    const tt = fakePublisher("tiktok", true);
+    const env = { AUTOMATON_PUBLISH: "true", AUTOMATON_VIDEOS_PER_DAY: "3" };
+    const create = fakeCreate();
+    const reports = [];
+    for (let i = 0; i < 4; i++) reports.push(await runDaily({ env, now, dir, writer, create, publishers: [yt, tt] }));
+    expect(tt.seen).toHaveLength(4);
+    expect(reports[2].video!.publications!.tiktok!.attempts).toBe(3);
+    expect(reports[3].created).toBe(true);
+    expect(reports[3].video!.id).not.toBe(reports[0].video!.id);
+  });
+
   it("waits for the next slot when the last video is too recent", async () => {
     const yt = fakePublisher("youtube");
     const env = { AUTOMATON_PUBLISH: "true", AUTOMATON_VIDEOS_PER_DAY: "3", AUTOMATON_MIN_GAP_MINUTES: "90" };

@@ -82,6 +82,8 @@ export interface PublicationRecord {
   id?: string;
   url?: string;
   error?: string;
+  /** Failed attempts so far; after MAX_ATTEMPTS the platform is left out for this video. */
+  attempts?: number;
 }
 
 export interface ImageProvider {

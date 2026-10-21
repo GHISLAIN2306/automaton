@@ -178,6 +178,9 @@ async function rerender(
   return carried;
 }
 
+/** A platform that keeps refusing a video (e.g. an app not yet audited) stops blocking the next ones. */
+const MAX_ATTEMPTS = 3;
+
 export async function runDaily(options: DailyOptions = {}): Promise<DailyReport> {
   const env = options.env ?? process.env;
   const dir = options.dir ?? getVideosDir();
@@ -196,8 +199,9 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
   const todays = listVideos(dir).filter((v) => !v.renderFailed && v.status !== "rejected" && v.createdAt.startsWith(today));
   // A platform added after a video went out does not get that video: only
   // failed posts, or a video posted nowhere yet, are retried.
+  const retryable = (r?: PublicationRecord) => r?.status === "failed" && (r.attempts ?? 1) < MAX_ATTEMPTS;
   const unfinished = (v: VideoManifest) =>
-    !v.publications || publishers.some((p) => v.publications?.[p.platform]?.status === "failed");
+    !v.publications || publishers.some((p) => retryable(v.publications?.[p.platform]));
   const clipsToday = todays.filter((v) => v.source === "clip").length;
   const aiToday = todays.length - clipsToday;
   const inbox = listInbox(clipsDir);
@@ -278,7 +282,7 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
   const publications: Partial<Record<Platform, PublicationRecord>> = { ...(video.publications ?? {}) };
   for (const publisher of publishers) {
     const previous = publications[publisher.platform];
-    if (previous && previous.status !== "failed") continue;
+    if (previous && !retryable(previous)) continue;
     try {
       const result = await publisher.publish({
         videoPath,
@@ -290,7 +294,7 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
       log(`${publisher.platform}: ${result.status}${result.url ? ` ${result.url}` : ""}`);
     } catch (err: any) {
       const message = err?.message ?? String(err);
-      publications[publisher.platform] = { status: "failed", at: new Date().toISOString(), error: message };
+      publications[publisher.platform] = { status: "failed", at: new Date().toISOString(), error: message, attempts: (previous?.attempts ?? 0) + 1 };
       report.failures.push(`${publisher.platform}: ${message}`);
       log(`${publisher.platform}: FAILED ${message}`);
     } finally {

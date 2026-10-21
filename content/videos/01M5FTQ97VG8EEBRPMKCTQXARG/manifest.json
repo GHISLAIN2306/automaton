@@ -41,7 +41,8 @@
     "tiktok": {
       "status": "failed",
       "at": "2026-10-21T18:26:01.300Z",
-      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/"
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 3
     }
   }
 }
