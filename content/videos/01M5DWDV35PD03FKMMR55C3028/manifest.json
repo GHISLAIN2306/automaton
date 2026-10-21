@@ -1,0 +1,47 @@
+{
+  "id": "01M5DWDV35PD03FKMMR55C3028",
+  "title": "La grenouille qui ressuscite chaque hiver",
+  "niche": "Vulgarisation en français : sciences, nature, animaux, patrimoine et prouesses d'ingénierie, racontés comme une petite histoire surprenante et rigoureusement exacte",
+  "status": "approved",
+  "createdAt": "2026-10-21T00:08:18.279Z",
+  "durationSec": 83.8,
+  "costCents": 25.41,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "83.8 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "Closest earlier video: \"L'incroyable arme secrète de la crevette-pistolet\" (1% overlap)"
+    }
+  ],
+  "caption": "Chaque hiver, la grenouille des bois cesse de respirer et son cœur s'arrête avant de ressusciter au dégel. Découvrez le secret biologique qui fascine les chirurgiens.",
+  "hashtags": [
+    "science",
+    "animaux",
+    "nature",
+    "biologie",
+    "vulgarisation"
+  ],
+  "reviewedAt": "2026-10-21T00:08:18.280Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-10-21T00:08:20.310Z",
+      "id": "klMej7SQ86s",
+      "url": "https://www.youtube.com/shorts/klMej7SQ86s"
+    }
+  }
+}
