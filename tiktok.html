@@ -1,0 +1,16 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Connexion TikTok</title><link rel="stylesheet" href="style.css"></head><body>
+<h1>Connecter TikTok à Drama Express</h1>
+<p>Collez la <strong>Client key</strong> de l'onglet <strong>Sandbox</strong> de votre app TikTok (pas le Client secret). Elle reste dans votre navigateur : cette page ne l'envoie nulle part ailleurs qu'à TikTok.</p>
+<p><input id="cle" type="text" placeholder="Client key Sandbox" autocomplete="off"></p>
+<p><button id="go" type="button">Autoriser avec TikTok</button></p>
+<p class="petit">TikTok vous demande de vous connecter : utilisez le compte dramaexpress225, puis acceptez. Vous revenez ensuite sur la page Drama Express, qui vous dit quoi faire.</p>
+<script>
+document.getElementById("go").onclick = function () {
+  var k = document.getElementById("cle").value.trim();
+  if (!k) { alert("Collez d'abord la Client key."); return; }
+  location.href = "https://www.tiktok.com/v2/auth/authorize/?client_key=" + encodeURIComponent(k) +
+    "&scope=user.info.basic,video.upload,video.publish&response_type=code" +
+    "&redirect_uri=" + encodeURIComponent("https://ghislain2306.github.io/automaton/") + "&state=drama";
+};
+</script>
+</body></html>

@@ -1,5 +1,25 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Automaton vidéos</title><link rel="stylesheet" href="style.css"></head><body>
-<h1>Automaton vidéos</h1>
-<p>Automaton vidéos est un outil personnel qui crée chaque jour une courte vidéo de vulgarisation en français (sciences, nature, patrimoine, ingénierie) et la publie sur les comptes YouTube, TikTok et Instagram de son propriétaire.</p>
-<p>Les vidéos sont générées par intelligence artificielle (voix et images) et portent en permanence la mention « Contenu généré par IA ». L’outil n’est utilisé que pour les comptes de son propriétaire et n’est pas proposé au public.</p>
-<footer><a href="index.html">Accueil</a> · <a href="confidentialite.html">Confidentialité</a> · <a href="conditions.html">Conditions d’utilisation</a> · Contact : decothy225@gmail.com</footer></body></html>
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Drama Express</title><link rel="stylesheet" href="style.css"></head><body>
+<div id="retour" class="box" hidden>
+<h2>TikTok a bien autorisé l'app ✅</h2>
+<p>Copiez l'adresse ci-dessous, puis collez-la dans « Connexion TikTok » sur GitHub. Faites-le tout de suite : le code expire en quelques minutes. Ne l'envoyez à personne.</p>
+<textarea id="adresse" rows="4" readonly></textarea>
+<p><button id="copier" type="button">1. Copier l'adresse</button>
+<a class="bouton" href="https://github.com/GHISLAIN2306/automaton/actions/workflows/tiktok-connexion.yml" target="_blank" rel="noopener">2. Ouvrir « Connexion TikTok » sur GitHub</a></p>
+<p class="petit">Sur GitHub : cliquez sur « Run workflow » (à droite), collez l'adresse dans la case, puis cliquez sur le bouton vert « Run workflow ».</p>
+</div>
+<h1>Drama Express</h1>
+<p>Drama Express publie chaque jour de courts extraits de mini-séries en français, et de courtes fictions originales, sur ses propres comptes YouTube, TikTok et Instagram.</p>
+<p>L'app Drama Express est un outil personnel qui publie ces vidéos sur les comptes de son propriétaire. Les fictions générées par intelligence artificielle portent la mention « Contenu généré par IA ». L'outil n'est pas proposé au public.</p>
+<footer><a href="index.html">Accueil</a> · <a href="suite/">La suite des séries</a> · <a href="confidentialite.html">Confidentialité</a> · <a href="conditions.html">Conditions d'utilisation</a> · Contact : decothy225@gmail.com</footer>
+<script>
+if (new URLSearchParams(location.search).has("code")) {
+  document.getElementById("retour").hidden = false;
+  var t = document.getElementById("adresse"); t.value = location.href;
+  document.getElementById("copier").onclick = function () {
+    t.select();
+    (navigator.clipboard ? navigator.clipboard.writeText(location.href) : Promise.reject()).catch(function () { document.execCommand("copy"); });
+    this.textContent = "Adresse copiée ✓";
+  };
+}
+</script>
+</body></html>

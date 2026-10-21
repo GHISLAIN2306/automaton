@@ -1,2 +1,6 @@
 body{font-family:system-ui,-apple-system,sans-serif;max-width:720px;margin:40px auto;padding:0 16px;line-height:1.6;color:#1f2937;background:#fff}
 h1{font-size:1.6rem}a{color:#2563eb}footer{margin-top:40px;font-size:.9rem;color:#6b7280}
+.box{border:2px solid #16a34a;border-radius:12px;padding:16px;margin-bottom:32px;background:#f0fdf4}
+textarea,input{width:100%;box-sizing:border-box;font:inherit;padding:10px;border:1px solid #d1d5db;border-radius:8px}
+button,.bouton{display:inline-block;margin:6px 8px 6px 0;padding:10px 16px;border:0;border-radius:8px;background:#e11d48;color:#fff;font:inherit;font-weight:600;text-decoration:none;cursor:pointer}
+.petit{font-size:.9rem;color:#6b7280}
