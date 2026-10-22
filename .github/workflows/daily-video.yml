@@ -40,6 +40,8 @@ jobs:
           node-version: 22
       - uses: pnpm/action-setup@v4
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core
+        # apt sometimes hangs on the runner: give up and let the next slot retry.
+        timeout-minutes: 10
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsc
 

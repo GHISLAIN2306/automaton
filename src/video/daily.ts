@@ -194,14 +194,20 @@ export async function runDaily(options: DailyOptions = {}): Promise<DailyReport>
   const clipsPerDay = intFromEnv(env.AUTOMATON_CLIPS_PER_DAY, 2);
   const aiOnlyPerDay = intFromEnv(env.AUTOMATON_AI_ONLY_PER_DAY, 2);
   const clipsDir = options.clipsDir ?? getClipsDir(dir);
-  const clipOptions: PrepareClipOptions = { dir, clipsDir, frame: options.frame, download: options.download };
+  const clipOptions: PrepareClipOptions = { dir, clipsDir, frame: options.frame, download: options.download, now };
   const publishers = options.publishers ?? publishersFromEnv(env);
   const todays = listVideos(dir).filter((v) => !v.renderFailed && v.status !== "rejected" && v.createdAt.startsWith(today));
   // A platform added after a video went out does not get that video: only
   // failed posts, or a video posted nowhere yet, are retried.
   const retryable = (r?: PublicationRecord) => r?.status === "failed" && (r.attempts ?? 1) < MAX_ATTEMPTS;
+  // A video already out on one platform is only retried while its file is
+  // still here (same run): on a fresh checkout, rendering it again for a
+  // platform that keeps refusing it would take the slot of the next video.
+  const postedSomewhere = (v: VideoManifest) => Object.values(v.publications ?? {}).some((r) => r && r.status !== "failed");
+  const hasFile = (v: VideoManifest) => fs.existsSync(path.join(dir, v.id, "video.mp4"));
   const unfinished = (v: VideoManifest) =>
-    !v.publications || publishers.some((p) => retryable(v.publications?.[p.platform]));
+    !v.publications ||
+    ((!postedSomewhere(v) || hasFile(v)) && publishers.some((p) => retryable(v.publications?.[p.platform])));
   const clipsToday = todays.filter((v) => v.source === "clip").length;
   const aiToday = todays.length - clipsToday;
   const inbox = listInbox(clipsDir);
