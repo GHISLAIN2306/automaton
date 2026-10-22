@@ -1,0 +1,53 @@
+{
+  "id": "01M5JNX24CGGPS3PCP0Q4161NY",
+  "title": "Elle déchire son contrat de mariage : l'erreur fatale",
+  "niche": "Mini-drames originaux en français, dans l'esprit des mini-séries à succès : milliardaire caché, humiliation suivie d'une revanche, belle-famille cruelle, mariage arrangé ou sous contrat, trahison, secret de famille, retour triomphal des années plus tard",
+  "status": "approved",
+  "createdAt": "2026-10-22T20:50:59.624Z",
+  "durationSec": 92.8,
+  "costCents": 29.11,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "92.8 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "Closest earlier video: \"Le lourd secret caché dans le coffre de son père\" (2% overlap)"
+    }
+  ],
+  "caption": "Pensant humilier sa belle-fille, elle a détruit la seule chose qui sauvait sa famille. Et vous, vous auriez pardonné ?",
+  "hashtags": [
+    "revanche",
+    "mariage",
+    "famille",
+    "minisérie",
+    "drama"
+  ],
+  "reviewedAt": "2026-10-22T20:50:59.625Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-10-22T20:51:02.075Z",
+      "id": "qumkv30Pwog",
+      "url": "https://www.youtube.com/shorts/qumkv30Pwog"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-10-22T20:51:04.196Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 1
+    }
+  }
+}
