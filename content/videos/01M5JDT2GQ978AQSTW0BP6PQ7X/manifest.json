@@ -1,0 +1,48 @@
+{
+  "id": "01M5JDT2GQ978AQSTW0BP6PQ7X",
+  "title": "Tout le monde la prenait pour une louve ratée. Grosse erreur. | Épisode 2",
+  "niche": "La Petite Louve qui Renversa le Destin de la Meute",
+  "status": "approved",
+  "createdAt": "2026-10-22T18:26:06.583Z",
+  "durationSec": 97.2,
+  "costCents": 0,
+  "visuals": "clip",
+  "aiLabel": "",
+  "voice": "original",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "97.2 s (Shorts: 180 s max)"
+    }
+  ],
+  "caption": "Tu veux savoir la suite ? 👀 Lien en bio, série n° 1 🎬",
+  "hashtags": [
+    "minisérie",
+    "drama",
+    "loupgarou",
+    "vengeance",
+    "dramaexpress"
+  ],
+  "source": "clip",
+  "hook": "Tout le monde la prenait pour une louve ratée. Grosse erreur.",
+  "dramaId": "653763",
+  "episode": 2,
+  "pack": "https://cps-distr.ikyuedu.com/distribution/8/DramaBox资源包-42000029109-e7a97e780e8cdfd05621d86ce95e4b0a.zip",
+  "reviewedAt": "2026-10-22T18:26:31.212Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-10-22T18:26:33.104Z",
+      "id": "AMwrtqAN0wE",
+      "url": "https://www.youtube.com/shorts/AMwrtqAN0wE"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-10-22T18:26:34.734Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 1
+    }
+  }
+}
