@@ -111,6 +111,8 @@ export interface PrepareClipOptions {
   /** Replaced in tests. */
   frame?: typeof frameClip;
   download?: typeof downloadEpisode;
+  /** Creation time of the video (the daily run's clock). */
+  now?: Date;
 }
 
 /** Takes a clip from the inbox and makes it today's video. */
@@ -137,7 +139,7 @@ export async function prepareClip(clip: ClipInfo, options: PrepareClipOptions): 
     ).slice(0, 90),
     niche: series,
     status: "pending_review",
-    createdAt: new Date().toISOString(),
+    createdAt: (options.now ?? new Date()).toISOString(),
     durationSec: 0,
     costCents: 0,
     visuals: "clip",

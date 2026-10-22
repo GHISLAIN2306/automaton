@@ -364,9 +364,23 @@ describe("daily run", () => {
     }
   });
 
+  it("does not render a video again on a fresh checkout once it is out on one platform", async () => {
+    const yt = fakePublisher("youtube");
+    const env = { AUTOMATON_PUBLISH: "true", AUTOMATON_VIDEOS_PER_DAY: "2" };
+    const create = fakeCreate();
+    await runDaily({ env, now, dir, writer, create, publishers: [yt, fakePublisher("tiktok", true)] });
+    fs.rmSync(path.join(dir, "vid1", "video.mp4"));
+    const tt = fakePublisher("tiktok", true);
+    const next = await runDaily({ env, now, dir, writer, create, publishers: [yt, tt] });
+    expect(next.video!.id).toBe("vid2");
+    expect(tt.seen.map((r) => r.videoPath)).toEqual([path.join(dir, "vid2", "video.mp4")]);
+    expect(yt.seen).toHaveLength(2);
+  });
+
   it("renders today's script again when the video file is gone (fresh CI checkout)", async () => {
     const yt = fakePublisher("youtube");
     const tt = fakePublisher("tiktok", true);
+    const ytDown = fakePublisher("youtube", true);
     const env = { AUTOMATON_PUBLISH: "true" };
     const create = fakeCreate();
     let written = 0;
@@ -374,7 +388,8 @@ describe("daily run", () => {
       written++;
       return writer();
     };
-    await runDaily({ env, now, dir, writer: countingWriter, create, publishers: [yt, tt] });
+    // Posted nowhere yet: a fresh checkout renders the same script again.
+    await runDaily({ env, now, dir, writer: countingWriter, create, publishers: [ytDown, tt] });
     fs.rmSync(path.join(dir, "vid1", "video.mp4"));
 
     const tt2 = fakePublisher("tiktok");
@@ -513,7 +528,7 @@ describe("daily run", () => {
       return 40;
     };
     const env = { AUTOMATON_PUBLISH: "true", AUTOMATON_VIDEOS_PER_DAY: "3" };
-    const first = await runDaily({ env, now, dir, writer, create: fakeCreate(), publishers: [fakePublisher("youtube"), fakePublisher("tiktok", true)], clipsDir, frame });
+    const first = await runDaily({ env, now, dir, writer, create: fakeCreate(), publishers: [fakePublisher("youtube", true), fakePublisher("tiktok", true)], clipsDir, frame });
     const id = first.video!.id;
     expect(fs.existsSync(path.join(clipsDir, "en-cours", `${id}.mp4`))).toBe(true);
     fs.rmSync(path.join(dir, id, "video.mp4"));
