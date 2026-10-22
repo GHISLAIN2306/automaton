@@ -27,7 +27,8 @@
       "épée",
       "dramaexpress"
     ],
-    "episodes": 5
+    "episodes": 5,
+    "paused": true
   },
   {
     "dramaId": "659872",

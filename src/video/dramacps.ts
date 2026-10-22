@@ -12,6 +12,7 @@
  *   [{"dramaId": "653763", "title": "...", "dramaUrl": "https://...",
  *     "pack": "https://...zip", "hook": "...", "episodes": 5}]
  * Each clip slot takes the next episode of the series posted least so far.
+ * A series with "paused": true is skipped (e.g. while its claims are sorted out).
  */
 
 import fs from "fs";
@@ -30,6 +31,8 @@ export interface PackSeries {
   hashtags?: string[];
   /** Episodes to post before moving on (default 5); the rest stays in the app. */
   episodes?: number;
+  /** Skipped until set back to false (e.g. a YouTube Content ID claim). */
+  paused?: boolean;
 }
 
 export interface ZipEntry {
@@ -108,7 +111,10 @@ export function loadPackSeries(clipsDir: string): PackSeries[] {
 export function nextPackEpisode(series: PackSeries[], videos: VideoManifest[]): { series: PackSeries; episode: number } | undefined {
   const taken = (s: PackSeries) =>
     videos.filter((v) => v.source === "clip" && v.dramaId === s.dramaId && !v.renderFailed && v.status !== "rejected").length;
-  const open = series.map((s) => ({ s, n: taken(s) })).filter(({ s, n }) => n < (s.episodes ?? 5));
+  const open = series
+    .filter((s) => !s.paused)
+    .map((s) => ({ s, n: taken(s) }))
+    .filter(({ s, n }) => n < (s.episodes ?? 5));
   if (!open.length) return undefined;
   const best = open.reduce((a, b) => (b.n < a.n ? b : a));
   return { series: best.s, episode: best.n + 1 };
