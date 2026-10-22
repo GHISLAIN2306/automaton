@@ -10,6 +10,10 @@
  * caption names it. These are not AI videos,
  * so they carry no AI label.
  *
+ * With AUTOMATON_CLIP_VOICE_ONLY=true, the soundtrack is split with Demucs
+ * and only the voices are kept: the background music of the episodes is
+ * library music that YouTube's Content ID blocks (not covered by the license).
+ *
  * Once taken, a clip moves to content/clips/en-cours/<video id>.mp4 so it can
  * be framed again on a fresh checkout, and is deleted once posted everywhere.
  */
@@ -74,17 +78,35 @@ function drawable(text: string): string {
   return text.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, "").replace(/\s+/g, " ").trim();
 }
 
+/**
+ * Writes the voices of a clip, without the music, to a WAV file (Demucs,
+ * installed with `pip install demucs`). Returns the path of the file.
+ */
+export async function isolateVoice(source: string, workDir: string): Promise<string> {
+  const audio = path.join(workDir, "audio.wav");
+  await run("ffmpeg", ["-y", "-v", "error", "-i", source, "-vn", "-ac", "2", "-ar", "44100", audio]);
+  await run("python3", ["-m", "demucs", "--two-stems=vocals", "-n", "htdemucs", "-o", workDir, audio], {
+    maxBuffer: 16 * 1024 * 1024,
+  });
+  const vocals = path.join(workDir, "htdemucs", "audio", "vocals.wav");
+  if (!fs.existsSync(vocals)) throw new Error("Demucs did not write the voices track");
+  return vocals;
+}
+
 /** Frames a clip to 1080x1920 with the hook on screen for the first seconds. */
 export async function frameClip(source: string, hook: string, outFile: string): Promise<number> {
   const font = filterPath(findFont());
   const hookFile = `${outFile}.hook.txt`;
   fs.writeFileSync(hookFile, wrapText(drawable(hook), 18));
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), "clip-"));
   try {
+    const voice = process.env.AUTOMATON_CLIP_VOICE_ONLY === "true" ? await isolateVoice(source, workDir) : undefined;
     await run(
       "ffmpeg",
       [
         "-y", "-v", "error",
         "-i", source,
+        ...(voice ? ["-i", voice, "-map", "0:v:0", "-map", "1:a:0"] : []),
         "-vf",
         "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black," +
           `drawtext=fontfile='${font}':textfile='${filterPath(hookFile)}':fontsize=78:fontcolor=white:` +
@@ -100,6 +122,7 @@ export async function frameClip(source: string, hook: string, outFile: string): 
     );
   } finally {
     fs.rmSync(hookFile, { force: true });
+    fs.rmSync(workDir, { recursive: true, force: true });
   }
   return probeDuration(outFile);
 }

@@ -3,6 +3,7 @@ import os from "os";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { buildDescription, publishersFromEnv, runDaily } from "../video/daily.js";
+import { nextPackEpisode } from "../video/dramacps.js";
 import { loadSeries, renderSeriesPage } from "../video/series.js";
 import { InstagramPublisher } from "../video/publish/instagram.js";
 import { TikTokPublisher } from "../video/publish/tiktok.js";
@@ -605,5 +606,17 @@ describe("daily run", () => {
     };
     expect(await category({})).toBe("24");
     expect(await category({ AUTOMATON_FORMAT: "vulgarisation" })).toBe("27");
+  });
+});
+
+describe("nextPackEpisode", () => {
+  it("skips a paused series", () => {
+    const series = [
+      { dramaId: "1", title: "A", pack: "a.zip", paused: true },
+      { dramaId: "2", title: "B", pack: "b.zip" },
+    ];
+    const posted = { source: "clip", dramaId: "2", status: "published" } as VideoManifest;
+    expect(nextPackEpisode(series, [posted])).toMatchObject({ series: { dramaId: "2" }, episode: 2 });
+    expect(nextPackEpisode([series[0]], [])).toBeUndefined();
   });
 });
