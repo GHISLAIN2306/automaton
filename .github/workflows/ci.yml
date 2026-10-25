@@ -1,11 +1,16 @@
 name: CI
-on: [push, pull_request]
+# Pull requests only, one Node version: GitHub stops the workflows of a fork
+# that uses too many Actions minutes, and the daily video must keep running.
+on:
+  pull_request:
+    paths-ignore:
+      - "content/**"
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20, 22]
+        node-version: [22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
