@@ -1,0 +1,32 @@
+{
+  "id": "01M5RW3F9G1CEDN2B45K27RSTT",
+  "title": "Ils ont jeté son salaire dans la boue. Grosse erreur. | Épisode 2",
+  "niche": "Ma Terre Aride Vaut de l'Or",
+  "status": "pending_review",
+  "createdAt": "2026-10-25T06:31:05.056Z",
+  "durationSec": 173.6,
+  "costCents": 0,
+  "visuals": "clip",
+  "aiLabel": "",
+  "voice": "original",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "173.6 s (Shorts: 180 s max)"
+    }
+  ],
+  "caption": "Tu veux savoir la suite ? 👀 Lien en bio, série n° 3 🎬",
+  "hashtags": [
+    "minisérie",
+    "drama",
+    "vengeance",
+    "cowboy",
+    "dramaexpress"
+  ],
+  "source": "clip",
+  "hook": "Ils ont jeté son salaire dans la boue. Grosse erreur.",
+  "dramaId": "659872",
+  "episode": 2,
+  "pack": "https://cps-distr.ikyuedu.com/distribution/6/DramaBox资源包-42000025929-9ae08e7d1453d0fd1736b45b8fa7586d.zip"
+}
