@@ -1,0 +1,48 @@
+{
+  "id": "01M5YMRBQBXJF21BYV1BQ2M2JS",
+  "title": "Ils ont jeté son salaire dans la boue. Grosse erreur. | Épisode 4",
+  "niche": "Ma Terre Aride Vaut de l'Or",
+  "status": "approved",
+  "createdAt": "2026-10-27T12:18:23.739Z",
+  "durationSec": 164.4,
+  "costCents": 0,
+  "visuals": "clip",
+  "aiLabel": "",
+  "voice": "original",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "164.4 s (Shorts: 180 s max)"
+    }
+  ],
+  "caption": "Tu veux savoir la suite ? 👀 Lien en bio, série n° 3 🎬",
+  "hashtags": [
+    "minisérie",
+    "drama",
+    "vengeance",
+    "cowboy",
+    "dramaexpress"
+  ],
+  "source": "clip",
+  "hook": "Ils ont jeté son salaire dans la boue. Grosse erreur.",
+  "dramaId": "659872",
+  "episode": 4,
+  "pack": "https://cps-distr.ikyuedu.com/distribution/6/DramaBox资源包-42000025929-9ae08e7d1453d0fd1736b45b8fa7586d.zip",
+  "reviewedAt": "2026-10-27T12:20:14.411Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-10-27T12:20:17.034Z",
+      "id": "a6erqeTQtSM",
+      "url": "https://www.youtube.com/shorts/a6erqeTQtSM"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-10-27T12:20:19.862Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 1
+    }
+  }
+}
