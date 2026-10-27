@@ -1,0 +1,53 @@
+{
+  "id": "01M5ZHRM5F2GC6GWW2DANK174Z",
+  "title": "L'auditrice humiliée rachetait son empire",
+  "niche": "Mini-drames originaux en français, dans l'esprit des mini-séries à succès : milliardaire caché, humiliation suivie d'une revanche, belle-famille cruelle, mariage arrangé ou sous contrat, trahison, secret de famille, retour triomphal des années plus tard",
+  "status": "approved",
+  "createdAt": "2026-10-27T20:48:24.611Z",
+  "durationSec": 79.1,
+  "costCents": 25.45,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "79.1 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "Closest earlier video: \"Elle déchire son contrat de mariage : l'erreur fatale\" (3% overlap)"
+    }
+  ],
+  "caption": "Marc pensait humilier une simple stagiaire, sans imaginer qui détenait réellement son avenir. Et vous, auriez-vous été aussi impitoyable ?",
+  "hashtags": [
+    "revanche",
+    "milliardaire",
+    "trahison",
+    "minisérie",
+    "drama"
+  ],
+  "reviewedAt": "2026-10-27T20:48:24.612Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-10-27T20:48:26.267Z",
+      "id": "mBL_jER2GA4",
+      "url": "https://www.youtube.com/shorts/mBL_jER2GA4"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-10-27T20:48:27.747Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 1
+    }
+  }
+}
