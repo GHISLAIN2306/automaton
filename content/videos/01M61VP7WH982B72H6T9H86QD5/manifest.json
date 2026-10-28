@@ -1,0 +1,53 @@
+{
+  "id": "01M61VP7WH982B72H6T9H86QD5",
+  "title": "Le brancardier humilié rachetait leur clinique",
+  "niche": "Mini-drames originaux en français, dans l'esprit des mini-séries à succès : milliardaire caché, humiliation suivie d'une revanche, belle-famille cruelle, mariage arrangé ou sous contrat, trahison, secret de famille, retour triomphal des années plus tard",
+  "status": "approved",
+  "createdAt": "2026-10-28T18:20:49.966Z",
+  "durationSec": 79.4,
+  "costCents": 25.38,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "79.4 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "Closest earlier video: \"L'auditrice humiliée rachetait son empire\" (3% overlap)"
+    }
+  ],
+  "caption": "Ils ont expulsé un simple employé de leur gala privé sans savoir qui il était vraiment. Et vous, auriez-vous été aussi impitoyable ?",
+  "hashtags": [
+    "revanche",
+    "milliardaire",
+    "justice",
+    "miniserie",
+    "drama"
+  ],
+  "reviewedAt": "2026-10-28T18:20:49.966Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-10-28T18:20:51.714Z",
+      "id": "UnB2Jyrteck",
+      "url": "https://www.youtube.com/shorts/UnB2Jyrteck"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-10-28T18:20:53.443Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 1
+    }
+  }
+}
