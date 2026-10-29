@@ -117,6 +117,8 @@ jobs:
           git add -A content/videos content/clips
           git diff --cached --quiet && exit 0
           git commit -m "Daily video $(date -u +%F)"
+          # main may have moved during the run (a merged pull request).
+          git pull --rebase origin main
           git push
 
       # Public page listing the DramaCPS series by number, for the bio link:
