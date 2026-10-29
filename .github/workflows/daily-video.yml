@@ -57,6 +57,8 @@ jobs:
           AUTOMATON_PUBLISH: ${{ (github.event_name == 'schedule' || inputs.publish) && 'true' || 'false' }}
           AUTOMATON_TOPIC: ${{ inputs.topic }}
           AUTOMATON_VIDEOS_PER_DAY: ${{ vars.AUTOMATON_VIDEOS_PER_DAY || '3' }}
+          # AI videos per day while no partner clip is waiting (fills all 3 slots).
+          AUTOMATON_AI_ONLY_PER_DAY: ${{ vars.AUTOMATON_AI_ONLY_PER_DAY || '3' }}
           # Minutes between two new videos (a late schedule after a manual run).
           AUTOMATON_MIN_GAP_MINUTES: '90'
           # Drop the background music of partner clips (YouTube blocks it).
