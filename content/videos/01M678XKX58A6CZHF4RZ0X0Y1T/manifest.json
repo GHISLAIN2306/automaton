@@ -1,0 +1,53 @@
+{
+  "id": "01M678XKX58A6CZHF4RZ0X0Y1T",
+  "title": "Le prétentieux déchire son CV : l'erreur fatale",
+  "niche": "Mini-drames originaux en français, dans l'esprit des mini-séries à succès : milliardaire caché, humiliation suivie d'une revanche, belle-famille cruelle, mariage arrangé ou sous contrat, trahison, secret de famille, retour triomphal des années plus tard",
+  "status": "approved",
+  "createdAt": "2026-10-30T20:47:20.277Z",
+  "durationSec": 95.7,
+  "costCents": 25.84,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "95.7 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "Closest earlier video: \"Elle déchire son contrat de mariage : l'erreur fatale\" (2% overlap)"
+    }
+  ],
+  "caption": "Il a cru pouvoir l'humilier sans conséquence, mais elle possédait son avenir. Et vous, vous auriez annulé l'accord ?",
+  "hashtags": [
+    "revanche",
+    "milliardaire",
+    "karma",
+    "minisérie",
+    "drama"
+  ],
+  "reviewedAt": "2026-10-30T20:47:20.278Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-10-30T20:47:21.813Z",
+      "id": "hO6ZMl8Qu8E",
+      "url": "https://www.youtube.com/shorts/hO6ZMl8Qu8E"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-10-30T20:47:23.765Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 1
+    }
+  }
+}
