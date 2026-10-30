@@ -1,0 +1,53 @@
+{
+  "id": "01M670BTKFKTQKXA15B9HS6ZZW",
+  "title": "L'architecte humiliée possédait tout le domaine",
+  "niche": "Mini-drames originaux en français, dans l'esprit des mini-séries à succès : milliardaire caché, humiliation suivie d'une revanche, belle-famille cruelle, mariage arrangé ou sous contrat, trahison, secret de famille, retour triomphal des années plus tard",
+  "status": "approved",
+  "createdAt": "2026-10-30T18:18:38.715Z",
+  "durationSec": 95.6,
+  "costCents": 25.75,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "95.6 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "Closest earlier video: \"L'auditrice humiliée rachetait son empire\" (3% overlap)"
+    }
+  ],
+  "caption": "Il a détruit son travail en plein gala sans savoir à qui appartenait le domaine. Et vous, vous auriez accepté ses excuses ?",
+  "hashtags": [
+    "revanche",
+    "minisérie",
+    "drama",
+    "trahison",
+    "karma"
+  ],
+  "reviewedAt": "2026-10-30T18:18:38.716Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-10-30T18:18:40.477Z",
+      "id": "iDIW1gMhan4",
+      "url": "https://www.youtube.com/shorts/iDIW1gMhan4"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-10-30T18:18:42.190Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 1
+    }
+  }
+}
