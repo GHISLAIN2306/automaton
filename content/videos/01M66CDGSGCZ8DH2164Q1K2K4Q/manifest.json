@@ -1,0 +1,53 @@
+{
+  "id": "01M66CDGSGCZ8DH2164Q1K2K4Q",
+  "title": "Elle finance son empire, il l'humilie avant l'accord",
+  "niche": "Mini-drames originaux en français, dans l'esprit des mini-séries à succès : milliardaire caché, humiliation suivie d'une revanche, belle-famille cruelle, mariage arrangé ou sous contrat, trahison, secret de famille, retour triomphal des années plus tard",
+  "status": "approved",
+  "createdAt": "2026-10-30T12:29:41.316Z",
+  "durationSec": 93.4,
+  "costCents": 25.8,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "93.4 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "Closest earlier video: \"Chassée du penthouse, elle était la vraie propriétaire\" (4% overlap)"
+    }
+  ],
+  "caption": "Il pensait se débarrasser d'un fardeau avant de signer le contrat de sa vie. Et vous, auriez-vous ruiné votre ex ?",
+  "hashtags": [
+    "revanche",
+    "milliardaire",
+    "trahison",
+    "minisérie",
+    "drama"
+  ],
+  "reviewedAt": "2026-10-30T12:29:41.317Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-10-30T12:29:43.943Z",
+      "id": "eDcbIXCCsL4",
+      "url": "https://www.youtube.com/shorts/eDcbIXCCsL4"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-10-30T12:29:46.664Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 1
+    }
+  }
+}
