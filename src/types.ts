@@ -75,7 +75,32 @@ export interface AutomatonConfig {
   rpcUrl?: string;
   /** Chain type for this automaton. Defaults to "evm" if absent. */
   chainType?: ChainType;
+  /** Simulation mode: virtual credits, simulated customers, no real funds. */
+  simulation?: SimulationConfig;
 }
+
+export interface SimulationConfig {
+  enabled: boolean;
+  /** Virtual starting balance, in cents. */
+  startingCreditsCents: number;
+  /** Seconds between rounds of simulated customer demand. */
+  customerIntervalSeconds: number;
+  /** Expected requests per round for a service priced near zero. */
+  baseRequestsPerTick: number;
+  /** Price (cents) at which demand drops to ~37% of base. */
+  referencePriceCents: number;
+  /** Virtual inference price charged when the provider reports no cost (e.g. Ollama). */
+  inferenceCentsPer1kTokens: number;
+}
+
+export const DEFAULT_SIMULATION_CONFIG: SimulationConfig = {
+  enabled: false,
+  startingCreditsCents: 500,
+  customerIntervalSeconds: 60,
+  baseRequestsPerTick: 5,
+  referencePriceCents: 5,
+  inferenceCentsPer1kTokens: 0.5,
+};
 
 export const DEFAULT_CONFIG: Partial<AutomatonConfig> = {
   conwayApiUrl: "https://api.conway.tech",
