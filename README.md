@@ -40,6 +40,41 @@ curl -fsSL https://conway.tech/automaton.sh | sh
 
 Note: Conway Cloud, Domains, and Inference has seen immense demand. We are working on scaling & perfomance.
 
+## Simulation Mode
+
+Test a revenue strategy with virtual money before risking real funds:
+
+```bash
+# Inference via a local Ollama model (or set OPENAI_API_KEY / ANTHROPIC_API_KEY)
+OLLAMA_BASE_URL=http://localhost:11434 AUTOMATON_MODEL=qwen3:8b \
+  node dist/index.js --run --simulate
+
+# Profit and loss so far
+node dist/index.js --report
+```
+
+In simulation mode:
+
+- The automaton starts with a virtual balance ($5 by default) instead of real Conway credits. Survival tiers still apply, so a simulated automaton can die.
+- Every turn is charged to that balance: the provider's reported cost, or `inferenceCentsPer1kTokens` when the provider reports none (Ollama).
+- The agent is told to build small paid HTTP services and list them in `~/.automaton/services.json`. Simulated customers call each listed service on a schedule; every 2xx response with a non-empty body pays the listed price. Demand falls as price rises. Per-service stats are written to `~/.automaton/services-stats.json` for the agent to read.
+- Tools that move real funds or create real infrastructure (`topup_credits`, `x402_fetch`, `register_erc8004`, `spawn_child`, `fund_child`, sandboxes) are denied by policy. Domains and credit transfers are only recorded in the virtual ledger. No setup wizard runs and no Conway API key is provisioned.
+
+Tune it in `~/.automaton/automaton.json`:
+
+```json
+"simulation": {
+  "enabled": true,
+  "startingCreditsCents": 500,
+  "customerIntervalSeconds": 60,
+  "baseRequestsPerTick": 5,
+  "referencePriceCents": 5,
+  "inferenceCentsPer1kTokens": 0.5
+}
+```
+
+The demand model is deliberately simple. A profitable simulation shows the agent can build and keep a working service running for less than it spends thinking; it does not predict what real customers will pay.
+
 ## How It Works
 
 Every automaton runs a continuous loop: **Think → Act → Observe → Repeat.**

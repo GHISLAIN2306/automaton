@@ -11,7 +11,7 @@ import fs from "fs";
 import path from "path";
 import { getWallet, getAutomatonDir } from "./identity/wallet.js";
 import { provision, loadApiKeyFromConfig } from "./identity/provision.js";
-import { loadConfig, resolvePath } from "./config.js";
+import { loadConfig, saveConfig, resolvePath } from "./config.js";
 import { createDatabase } from "./state/database.js";
 import { createConwayClient } from "./conway/client.js";
 import { createInferenceClient } from "./conway/inference.js";
@@ -36,6 +36,20 @@ import { prettySink } from "./observability/pretty-sink.js";
 import { bootstrapTopup } from "./conway/topup.js";
 import { randomUUID } from "crypto";
 import { keccak256, toHex } from "viem";
+import {
+  SimulationLedger,
+  createSimulatedConwayClient,
+  CustomerSimulator,
+  createSimulationRules,
+  createSimulationConfig,
+  isSimulationRequested,
+  resolveSimulationConfig,
+  getServicesPath,
+  getServiceStatsPath,
+  turnCostCents,
+  formatSimulationReport,
+  restrictModelsToConfiguredProviders,
+} from "./simulation/index.js";
 
 const logger = createLogger("main");
 const VERSION = "0.2.1";
@@ -57,6 +71,9 @@ Sovereign AI Agent Runtime
 
 Usage:
   automaton --run          Start the automaton (first run triggers setup wizard)
+  automaton --run --simulate
+                           Run with virtual credits and simulated customers (no real funds)
+  automaton --report       Show the simulation profit/loss report
   automaton --setup        Re-run the interactive setup wizard
   automaton --configure    Edit configuration (providers, model, treasury, general)
   automaton --pick-model   Interactively pick the active inference model
@@ -70,6 +87,8 @@ Environment:
   CONWAY_API_URL           Conway API URL (default: https://api.conway.tech)
   CONWAY_API_KEY           Conway API key (overrides config)
   OLLAMA_BASE_URL          Ollama base URL (overrides config, e.g. http://localhost:11434)
+  AUTOMATON_SIMULATION     Set to 1 to force simulation mode
+  AUTOMATON_MODEL          Inference model for a new simulated automaton
 `);
     process.exit(0);
   }
@@ -106,6 +125,11 @@ Environment:
     process.exit(0);
   }
 
+  if (args.includes("--report")) {
+    await showSimulationReport();
+    process.exit(0);
+  }
+
   if (args.includes("--status")) {
     await showStatus();
     process.exit(0);
@@ -131,7 +155,7 @@ Environment:
 
   if (args.includes("--run")) {
     StructuredLogger.setSink(prettySink);
-    await run();
+    await run(isSimulationRequested(args, process.env, loadConfig()));
     return;
   }
 
@@ -181,22 +205,52 @@ Version:    ${config.version}
   db.close();
 }
 
+// ─── Simulation Report ────────────────────────────────────────
+
+async function showSimulationReport(): Promise<void> {
+  const config = loadConfig();
+  if (!config) {
+    logger.info("Automaton is not configured. Run: automaton --run --simulate");
+    return;
+  }
+  const db = createDatabase(resolvePath(config.dbPath));
+  logger.info(`\n${formatSimulationReport(new SimulationLedger(db.raw))}\n`);
+  db.close();
+}
+
 // ─── Main Run ──────────────────────────────────────────────────
 
-async function run(): Promise<void> {
+async function run(simulate = false): Promise<void> {
   logger.info(`[${new Date().toISOString()}] Conway Automaton v${VERSION} starting...`);
+  if (simulate) {
+    logger.info(
+      `[${new Date().toISOString()}] SIMULATION MODE: virtual credits and simulated customers. No real funds are used.`,
+    );
+  }
 
   // Load config — first run triggers interactive setup wizard
+  // (simulation builds a local config instead: the wizard provisions a real API key)
   let config = loadConfig();
+  if (!config && simulate) {
+    const { chainIdentity: simIdentity } = await getWallet();
+    config = createSimulationConfig({ walletAddress: simIdentity.address, env: process.env });
+    saveConfig(config);
+    logger.info(`[${new Date().toISOString()}] Created simulation config (model: ${config.inferenceModel}).`);
+  }
   if (!config) {
     const { runSetupWizard } = await import("./setup/wizard.js");
     config = await runSetupWizard();
+  }
+  const simulation = simulate ? resolveSimulationConfig(config) : undefined;
+  if (simulation) {
+    // Never touch a real sandbox while simulating.
+    config = { ...config, sandboxId: "", simulation };
   }
 
   // Load wallet (chain-aware)
   const { account, chainIdentity, chainType: walletChainType } = await getWallet();
   const resolvedChainType = config.chainType || walletChainType || "evm";
-  const apiKey = config.conwayApiKey || loadApiKeyFromConfig();
+  const apiKey = config.conwayApiKey || loadApiKeyFromConfig() || (simulation ? "simulation" : "");
   if (!apiKey) {
     logger.error("No API key found. Run: automaton --provision");
     process.exit(1);
@@ -238,16 +292,23 @@ async function run(): Promise<void> {
     db.setIdentity("automatonId", automatonId);
   }
 
-  // Create Conway client
-  const conway = createConwayClient({
-    apiUrl: config.conwayApiUrl,
-    apiKey,
-    sandboxId: config.sandboxId,
-  });
+  // Create Conway client (simulated: virtual credits, local execution)
+  let ledger: SimulationLedger | undefined;
+  if (simulation) {
+    ledger = new SimulationLedger(db.raw);
+    ledger.seed(simulation.startingCreditsCents);
+  }
+  const conway = ledger
+    ? createSimulatedConwayClient(ledger)
+    : createConwayClient({
+        apiUrl: config.conwayApiUrl,
+        apiKey,
+        sandboxId: config.sandboxId,
+      });
 
   // Register automaton identity (one-time, immutable)
   const registrationState = db.getIdentity("conwayRegistrationStatus");
-  if (registrationState !== "registered") {
+  if (!simulation && registrationState !== "registered") {
     try {
       const genesisPromptHash = config.genesisPrompt
         ? keccak256(toHex(config.genesisPrompt))
@@ -284,6 +345,13 @@ async function run(): Promise<void> {
   // "gpt-oss:120b" route to Ollama based on their registered provider, not heuristics.
   const modelRegistry = new ModelRegistry(db.raw);
   modelRegistry.initialize();
+  if (simulation) {
+    restrictModelsToConfiguredProviders(modelRegistry, {
+      openaiApiKey: config.openaiApiKey,
+      anthropicApiKey: config.anthropicApiKey,
+      ollamaBaseUrl,
+    });
+  }
   const inference = createInferenceClient({
     apiUrl: config.conwayApiUrl,
     apiKey,
@@ -309,7 +377,10 @@ async function run(): Promise<void> {
 
   // Initialize PolicyEngine + SpendTracker (Phase 1.4)
   const treasuryPolicy = config.treasuryPolicy ?? DEFAULT_TREASURY_POLICY;
-  const rules = createDefaultRules(treasuryPolicy);
+  const rules = [
+    ...createDefaultRules(treasuryPolicy),
+    ...(simulation ? createSimulationRules() : []),
+  ];
   const policyEngine = new PolicyEngine(db.raw, rules);
   const spendTracker = new SpendTracker(db.raw);
 
@@ -338,7 +409,8 @@ async function run(): Promise<void> {
 
   // Bootstrap topup: buy minimum credits ($5) from USDC so the agent can start.
   // The agent decides larger topups itself via the topup_credits tool.
-  try {
+  // Skipped in simulation: it spends real USDC.
+  if (!simulation) try {
     let bootstrapTimer: ReturnType<typeof setTimeout>;
     const bootstrapTimeout = new Promise<null>((_, reject) => {
       bootstrapTimer = setTimeout(() => reject(new Error("bootstrap topup timed out")), 15_000);
@@ -387,10 +459,28 @@ async function run(): Promise<void> {
   heartbeat.start();
   logger.info(`[${new Date().toISOString()}] Heartbeat daemon started.`);
 
+  // Simulated customers buy from the services the agent lists.
+  let customers: CustomerSimulator | undefined;
+  if (simulation && ledger) {
+    customers = new CustomerSimulator({
+      ledger,
+      servicesPath: getServicesPath(),
+      statsPath: getServiceStatsPath(),
+      baseRequestsPerTick: simulation.baseRequestsPerTick,
+      referencePriceCents: simulation.referencePriceCents,
+    });
+    customers.start(simulation.customerIntervalSeconds * 1000);
+    logger.info(
+      `[${new Date().toISOString()}] Simulated customers started (every ${simulation.customerIntervalSeconds}s, services: ${getServicesPath()}).`,
+    );
+  }
+
   // Handle graceful shutdown
   const shutdown = () => {
     logger.info(`[${new Date().toISOString()}] Shutting down...`);
     heartbeat.stop();
+    customers?.stop();
+    if (ledger) logger.info(`\n${formatSimulationReport(ledger)}`);
     db.setAgentState("sleeping");
     db.close();
     process.exit(0);
@@ -428,6 +518,13 @@ async function run(): Promise<void> {
           logger.info(`[${new Date().toISOString()}] State: ${state}`);
         },
         onTurnComplete: (turn) => {
+          if (ledger && simulation) {
+            ledger.charge(
+              "inference",
+              turnCostCents(turn.costCents, turn.tokenUsage.totalTokens, simulation),
+              `Turn ${turn.id}`,
+            );
+          }
           logger.info(
             `[${new Date().toISOString()}] Turn ${turn.id}: ${turn.toolCalls.length} tools, ${turn.tokenUsage.totalTokens} tokens`,
           );
