@@ -1,0 +1,53 @@
+{
+  "id": "01M6PQ9FWDAF39QQFZZ57M1NQ8",
+  "title": "Il arrose son dossier de champagne : l'erreur fatale",
+  "niche": "Mini-drames originaux en français, dans l'esprit des mini-séries à succès : milliardaire caché, humiliation suivie d'une revanche, belle-famille cruelle, mariage arrangé ou sous contrat, trahison, secret de famille, retour triomphal des années plus tard",
+  "status": "approved",
+  "createdAt": "2026-11-05T20:47:26.313Z",
+  "durationSec": 90.4,
+  "costCents": 25.63,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "90.4 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "Closest earlier video: \"L'auditrice humiliée rachetait son empire\" (3% overlap)"
+    }
+  ],
+  "caption": "Lucas pensait humilier une simple coursière en trempant ses papiers dans le champagne. Auriez-vous gardé votre calme à sa place ?",
+  "hashtags": [
+    "revanche",
+    "milliardaire",
+    "trahison",
+    "minisérie",
+    "drama"
+  ],
+  "reviewedAt": "2026-11-05T20:47:26.313Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-11-05T20:47:28.393Z",
+      "id": "lhAjJuwk64c",
+      "url": "https://www.youtube.com/shorts/lhAjJuwk64c"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-11-05T20:47:31.772Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 1
+    }
+  }
+}
