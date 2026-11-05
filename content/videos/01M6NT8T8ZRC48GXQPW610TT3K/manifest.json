@@ -1,0 +1,53 @@
+{
+  "id": "01M6NT8T8ZRC48GXQPW610TT3K",
+  "title": "Il répudie sa fiancée : son empire s'effondre",
+  "niche": "Mini-drames originaux en français, dans l'esprit des mini-séries à succès : milliardaire caché, humiliation suivie d'une revanche, belle-famille cruelle, mariage arrangé ou sous contrat, trahison, secret de famille, retour triomphal des années plus tard",
+  "status": "approved",
+  "createdAt": "2026-11-05T12:21:07.932Z",
+  "durationSec": 100.8,
+  "costCents": 29.28,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "100.8 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "Closest earlier video: \"L'auditrice humiliée rachetait son empire\" (4% overlap)"
+    }
+  ],
+  "caption": "Lucas pensait se débarrasser d'un fardeau, mais il vient de signer sa propre ruine. Et vous, vous auriez pardonné ?",
+  "hashtags": [
+    "revanche",
+    "trahison",
+    "milliardaire",
+    "minisérie",
+    "drama"
+  ],
+  "reviewedAt": "2026-11-05T12:21:07.932Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-11-05T12:21:10.891Z",
+      "id": "2-jsjA4iBRk",
+      "url": "https://www.youtube.com/shorts/2-jsjA4iBRk"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-11-05T12:21:12.604Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 1
+    }
+  }
+}
