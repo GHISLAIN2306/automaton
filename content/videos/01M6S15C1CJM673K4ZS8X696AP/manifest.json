@@ -1,0 +1,53 @@
+{
+  "id": "01M6S15C1CJM673K4ZS8X696AP",
+  "title": "Il noie son rapport dans le champagne : la ruine",
+  "niche": "Mini-drames originaux en français, dans l'esprit des mini-séries à succès : milliardaire caché, humiliation suivie d'une revanche, belle-famille cruelle, mariage arrangé ou sous contrat, trahison, secret de famille, retour triomphal des années plus tard",
+  "status": "approved",
+  "createdAt": "2026-11-06T18:18:40.979Z",
+  "durationSec": 82.3,
+  "costCents": 25.54,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "82.3 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "Closest earlier video: \"Il chasse la femme de ménage : l'erreur fatale\" (4% overlap)"
+    }
+  ],
+  "caption": "Julien a humilié cette femme en détruisant son dossier, sans savoir qu'elle contrôlait tout son palace. Et vous, vous auriez pardonné ?",
+  "hashtags": [
+    "revanche",
+    "milliardaire",
+    "minisérie",
+    "drama",
+    "histoire"
+  ],
+  "reviewedAt": "2026-11-06T18:18:40.979Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-11-06T18:18:42.699Z",
+      "id": "N_U2p2HiDCI",
+      "url": "https://www.youtube.com/shorts/N_U2p2HiDCI"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-11-06T18:18:44.323Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 1
+    }
+  }
+}
