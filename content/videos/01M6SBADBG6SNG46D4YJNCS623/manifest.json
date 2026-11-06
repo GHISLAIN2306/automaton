@@ -1,0 +1,53 @@
+{
+  "id": "01M6SBADBG6SNG46D4YJNCS623",
+  "title": "Il chasse la mécanicienne : sa ruine à 40 millions",
+  "niche": "Mini-drames originaux en français, dans l'esprit des mini-séries à succès : milliardaire caché, humiliation suivie d'une revanche, belle-famille cruelle, mariage arrangé ou sous contrat, trahison, secret de famille, retour triomphal des années plus tard",
+  "status": "approved",
+  "createdAt": "2026-11-06T21:15:53.014Z",
+  "durationSec": 83.6,
+  "costCents": 25.53,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "83.6 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "Closest earlier video: \"Le brancardier humilié rachetait leur clinique\" (2% overlap)"
+    }
+  ],
+  "caption": "Il pensait humilier une simple ouvrière, sans savoir qu'elle possédait tout le chantier naval. Et vous, auriez-vous annulé la vente ?",
+  "hashtags": [
+    "revanche",
+    "milliardaire",
+    "karma",
+    "drama",
+    "minisérie"
+  ],
+  "reviewedAt": "2026-11-06T21:15:53.014Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-11-06T21:15:54.780Z",
+      "id": "Y4QLxGceAt8",
+      "url": "https://www.youtube.com/shorts/Y4QLxGceAt8"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-11-06T21:15:56.300Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 1
+    }
+  }
+}
