@@ -1,0 +1,53 @@
+{
+  "id": "01M6VW2DS4SMB8WN7NQVTX3B06",
+  "title": "Il chasse la cavalière : sa ruine à 10 millions",
+  "niche": "Mini-drames originaux en français, dans l'esprit des mini-séries à succès : milliardaire caché, humiliation suivie d'une revanche, belle-famille cruelle, mariage arrangé ou sous contrat, trahison, secret de famille, retour triomphal des années plus tard",
+  "status": "approved",
+  "createdAt": "2026-11-07T20:47:00.559Z",
+  "durationSec": 81.3,
+  "costCents": 25.44,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "81.3 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "Closest earlier video: \"Il licencie son humble jardinier : le choc total\" (5% overlap)"
+    }
+  ],
+  "caption": "Il pensait régner sur ce haras de prestige, mais la cavalière humiliée possédait tout son patrimoine. Et vous, auriez-vous pardonné une telle arrogance ?",
+  "hashtags": [
+    "revanche",
+    "milliardaire",
+    "drama",
+    "minisérie",
+    "histoire"
+  ],
+  "reviewedAt": "2026-11-07T20:47:00.560Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-11-07T20:47:02.630Z",
+      "id": "7XMM5N-idRk",
+      "url": "https://www.youtube.com/shorts/7XMM5N-idRk"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-11-07T20:47:04.384Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 1
+    }
+  }
+}
