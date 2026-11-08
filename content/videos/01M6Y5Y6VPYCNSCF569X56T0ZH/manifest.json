@@ -1,0 +1,53 @@
+{
+  "id": "01M6Y5Y6VPYCNSCF569X56T0ZH",
+  "title": "Il jette sa tablette à l'eau : sa ruine à 50 millions",
+  "niche": "Mini-drames originaux en français, dans l'esprit des mini-séries à succès : milliardaire caché, humiliation suivie d'une revanche, belle-famille cruelle, mariage arrangé ou sous contrat, trahison, secret de famille, retour triomphal des années plus tard",
+  "status": "approved",
+  "createdAt": "2026-11-08T18:18:39.953Z",
+  "durationSec": 84.5,
+  "costCents": 28.89,
+  "visuals": "gemini-nano-banana-2.1",
+  "aiLabel": "Contenu généré par IA",
+  "voice": "gemini-3.8-flash-tts:Charon",
+  "checks": [
+    {
+      "name": "duration",
+      "passed": true,
+      "detail": "84.5 s (TikTok Creator Rewards counts videos over 60 s)"
+    },
+    {
+      "name": "ai_label",
+      "passed": true,
+      "detail": "Visible label on every frame: \"Contenu généré par IA\""
+    },
+    {
+      "name": "originality",
+      "passed": true,
+      "detail": "Closest earlier video: \"La fiancée sans le sou rachète tout son groupe\" (3% overlap)"
+    }
+  ],
+  "caption": "Il a cru pouvoir humilier une simple employée de ponton avant sa plus grosse signature. Et vous, vous auriez levé la saisie ?",
+  "hashtags": [
+    "revanche",
+    "milliardaire",
+    "miniserie",
+    "drama",
+    "trahison"
+  ],
+  "reviewedAt": "2026-11-08T18:18:39.954Z",
+  "reviewNote": "Publication automatique",
+  "publications": {
+    "youtube": {
+      "status": "published",
+      "at": "2026-11-08T18:18:41.523Z",
+      "id": "cidAxZBMiGg",
+      "url": "https://www.youtube.com/shorts/cidAxZBMiGg"
+    },
+    "tiktok": {
+      "status": "failed",
+      "at": "2026-11-08T18:18:43.209Z",
+      "error": "TikTok post start: HTTP 403: Please review our integration guidelines at https://developers.tiktok.com/doc/content-sharing-guidelines/",
+      "attempts": 1
+    }
+  }
+}
